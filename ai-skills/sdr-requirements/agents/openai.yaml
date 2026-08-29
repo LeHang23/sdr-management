@@ -1,0 +1,4 @@
+interface:
+  display_name: "SDR Requirements"
+  short_description: "Maintain bilingual SDR requirement documents"
+  default_prompt: "Use $sdr-requirements to add or update requirements for an SDR Management screen."

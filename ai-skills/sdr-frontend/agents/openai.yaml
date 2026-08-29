@@ -1,0 +1,4 @@
+interface:
+  display_name: "SDR Frontend"
+  short_description: "Build and verify SDR Management interfaces"
+  default_prompt: "Use $sdr-frontend to implement the next SDR Management screen from its Figma design and requirements."
