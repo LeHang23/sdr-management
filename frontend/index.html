@@ -2,12 +2,333 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <meta
+      name="description"
+      content="SDR Management administrator dashboard prototype"
+    />
+    <title>SDR Management — Operations overview</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <img class="brand-mark-bg" src="assets/icons/brand-bg.svg" alt="" />
+            <img class="brand-mark-device" src="assets/icons/brand-device.svg" alt="" />
+          </span>
+          <span class="brand-copy">
+            <strong>SDR Management</strong>
+            <small>Operations platform</small>
+          </span>
+        </div>
+
+        <nav class="navigation">
+          <p class="nav-label">Operations</p>
+          <a class="nav-item is-active" href="#overview" aria-current="page">
+            <span class="nav-icon" aria-hidden="true"><img src="assets/icons/overview.svg" alt="" /></span>
+            <span>Overview</span>
+          </a>
+          <a class="nav-item" href="#devices">
+            <span class="nav-icon" aria-hidden="true"><img src="assets/icons/devices.svg" alt="" /></span>
+            <span>Devices</span>
+          </a>
+          <a class="nav-item" href="#new-reconfiguration">
+            <span class="nav-icon nav-icon-composite" aria-hidden="true">
+              <img src="assets/icons/reconfiguration.svg" alt="" />
+              <img class="reconfiguration-detail" src="assets/icons/reconfiguration-detail.svg" alt="" />
+            </span>
+            <span>Reconfiguration</span>
+          </a>
+          <a class="nav-item" href="#monitoring">
+            <span class="nav-icon" aria-hidden="true"><img src="assets/icons/monitoring.svg" alt="" /></span>
+            <span>Monitoring</span>
+          </a>
+
+          <p class="nav-label nav-label-secondary">Administration</p>
+          <span class="nav-item is-disabled" aria-disabled="true">
+            <span class="nav-icon" aria-hidden="true"><img src="assets/icons/firmware.svg" alt="" /></span>
+            <span>Firmware</span>
+          </span>
+          <span class="nav-item is-disabled" aria-disabled="true">
+            <span class="nav-icon" aria-hidden="true"><img src="assets/icons/config-profiles.svg" alt="" /></span>
+            <span>Config profiles</span>
+          </span>
+          <a class="nav-item" href="#alerts">
+            <span class="nav-icon nav-icon-composite nav-icon-alerts" aria-hidden="true">
+              <img src="assets/icons/alerts.svg" alt="" />
+              <img class="alerts-detail" src="assets/icons/alerts-detail.svg" alt="" />
+            </span>
+            <span>Alerts</span>
+            <span class="nav-badge" aria-label="3 unread alerts">3</span>
+          </a>
+          <span class="nav-item is-disabled" aria-disabled="true">
+            <span class="nav-icon" aria-hidden="true"><img src="assets/icons/audit-log.svg" alt="" /></span>
+            <span>Audit log</span>
+          </span>
+        </nav>
+
+        <section class="simulator-card" aria-label="Simulator environment">
+          <div class="simulator-title">
+            <strong>Simulation engine</strong>
+          </div>
+          <p>24 virtual devices streaming telemetry every 5 seconds.</p>
+        </section>
+      </aside>
+
+      <div class="content-shell">
+        <header class="global-header" aria-label="Administrator toolbar">
+          <p class="breadcrumb">
+            <span>SDR Management</span>
+            <span aria-hidden="true">/</span>
+            <strong>Overview</strong>
+          </p>
+
+          <div class="global-header-actions">
+            <button class="icon-button" type="button" aria-label="Search SDR Management">
+              <span class="search-glyph" aria-hidden="true">⌕</span>
+            </button>
+            <button class="profile-button" type="button" aria-label="Open Administrator profile menu">
+              <span class="avatar" aria-hidden="true">AD</span>
+            </button>
+          </div>
+        </header>
+
+        <main class="workspace" id="overview">
+        <header class="page-header">
+          <div>
+            <h1>Operations overview</h1>
+            <p class="page-subtitle">
+              Saturday, Aug 29, 2026 · Data from SDR Simulator
+            </p>
+          </div>
+          <div class="header-actions">
+            <button class="primary-button" id="new-reconfiguration" type="button">
+              <span aria-hidden="true">✦</span>
+              New reconfiguration
+            </button>
+          </div>
+        </header>
+
+        <section class="kpi-grid" aria-label="Fleet summary">
+          <article class="card kpi-card">
+            <div class="kpi-heading">
+              <p>Total devices</p>
+              <span class="metric-icon blue" aria-hidden="true">▣</span>
+            </div>
+            <strong class="kpi-value">24</strong>
+            <p class="metric-note positive"><span>+3</span> this month</p>
+          </article>
+
+          <article class="card kpi-card">
+            <div class="kpi-heading">
+              <p>Online now</p>
+              <span class="metric-icon green" aria-hidden="true">◉</span>
+            </div>
+            <strong class="kpi-value">19</strong>
+            <p class="metric-note positive"><span>79.2%</span> fleet availability</p>
+          </article>
+
+          <article class="card kpi-card">
+            <div class="kpi-heading">
+              <p>Needs attention</p>
+              <span class="metric-icon amber" aria-hidden="true">△</span>
+            </div>
+            <strong class="kpi-value">5</strong>
+            <p class="metric-note warning"><span>3 alerts</span> · 2 offline</p>
+          </article>
+
+          <article class="card kpi-card">
+            <div class="kpi-heading">
+              <p>Active jobs</p>
+              <span class="metric-icon cyan" aria-hidden="true">↻</span>
+            </div>
+            <strong class="kpi-value">3</strong>
+            <p class="metric-note"><span>2 deploying</span> · 1 verifying</p>
+          </article>
+        </section>
+
+        <section class="analytics-grid" aria-label="System analytics">
+          <article class="card performance-card" id="monitoring">
+            <div class="card-header">
+              <div>
+                <h2>System performance</h2>
+                <p>Last 6 hours · 19 devices online on average</p>
+              </div>
+              <label class="time-range">
+                <span class="sr-only">Performance time range</span>
+                <select aria-label="Performance time range">
+                  <option>1H</option>
+                  <option selected>6H</option>
+                  <option>24H</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="chart-legend" aria-hidden="true">
+              <span><i class="legend-dot throughput"></i>Throughput (Mbps)</span>
+              <span><i class="legend-dot snr"></i>SNR (dB)</span>
+            </div>
+
+            <div class="line-chart" role="img" aria-label="Throughput and SNR trend chart from 06:00 to 12:00">
+              <div class="y-axis" aria-hidden="true">
+                <span>80</span><span>60</span><span>40</span><span>20</span>
+              </div>
+              <svg viewBox="0 0 760 220" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                  <linearGradient id="throughput-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#2563eb" stop-opacity="0.20" />
+                    <stop offset="100%" stop-color="#2563eb" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+                <g class="chart-grid">
+                  <line x1="0" y1="22" x2="760" y2="22" />
+                  <line x1="0" y1="72" x2="760" y2="72" />
+                  <line x1="0" y1="122" x2="760" y2="122" />
+                  <line x1="0" y1="172" x2="760" y2="172" />
+                </g>
+                <path class="area" d="M0 150 L70 136 L140 145 L210 116 L280 124 L350 88 L420 103 L490 70 L560 86 L630 52 L700 68 L760 34 L760 205 L0 205 Z" />
+                <polyline class="throughput-line" points="0,150 70,136 140,145 210,116 280,124 350,88 420,103 490,70 560,86 630,52 700,68 760,34" />
+                <polyline class="snr-line" points="0,184 70,176 140,182 210,163 280,169 350,146 420,154 490,136 560,144 630,127 700,135 760,118" />
+              </svg>
+              <div class="x-axis" aria-hidden="true">
+                <span>06:00</span><span>07:30</span><span>09:00</span><span>10:30</span><span>12:00</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card health-card">
+            <div class="card-header">
+              <div>
+                <h2>Fleet health</h2>
+                <p>Updated at 12:03:45</p>
+              </div>
+            </div>
+            <div class="health-content">
+              <div class="donut-wrap" role="img" aria-label="79 percent of fleet is healthy">
+                <div class="donut-chart">
+                  <div class="donut-center">
+                    <strong>79%</strong>
+                    <span>Healthy</span>
+                  </div>
+                </div>
+              </div>
+              <ul class="health-legend">
+                <li><span><i class="health-dot online"></i>Online</span><strong>19</strong></li>
+                <li><span><i class="health-dot warning"></i>Warning</span><strong>3</strong></li>
+                <li><span><i class="health-dot offline"></i>Offline</span><strong>2</strong></li>
+                <li><span><i class="health-dot updating"></i>Updating</span><strong>3</strong></li>
+              </ul>
+            </div>
+          </article>
+        </section>
+
+        <section class="details-grid">
+          <article class="card devices-card" id="devices">
+            <div class="card-header list-header">
+              <div>
+                <h2>Devices to watch</h2>
+                <p>Sorted by priority</p>
+              </div>
+              <span
+                class="planned-link"
+                role="link"
+                aria-disabled="true"
+                aria-label="View all devices needing attention. Device Management is planned."
+                title="Will open Device Management with the Needs attention filter"
+              >
+                View all <span aria-hidden="true">→</span>
+              </span>
+            </div>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Device</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Firmware</th>
+                    <th scope="col">SNR</th>
+                    <th scope="col">Temperature</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>SDR-HCM-04</strong><small>USRP B210 · Lab A</small></td>
+                    <td><span class="status-tag warning"><i></i>Warning</span></td>
+                    <td>v2.3.1</td>
+                    <td>11.8 dB</td>
+                    <td><strong class="hot-value">72°C</strong></td>
+                  </tr>
+                  <tr>
+                    <td><strong>SDR-DN-02</strong><small>LimeSDR · Station 2</small></td>
+                    <td><span class="status-tag offline"><i></i>Offline</span></td>
+                    <td>v2.2.8</td>
+                    <td>—</td>
+                    <td>—</td>
+                  </tr>
+                  <tr>
+                    <td><strong>SDR-HN-07</strong><small>PlutoSDR · Rooftop</small></td>
+                    <td><span class="status-tag online"><i></i>Online</span></td>
+                    <td>v2.3.1</td>
+                    <td>24.6 dB</td>
+                    <td>48°C</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="card alerts-card" id="alerts">
+            <div class="card-header list-header">
+              <div>
+                <h2>Recent alerts</h2>
+                <p>2 unresolved alerts</p>
+              </div>
+              <span
+                class="planned-link"
+                role="link"
+                aria-disabled="true"
+                aria-label="View all alerts. Alert inbox is planned."
+                title="Will open the complete Alert inbox"
+              >
+                All <span aria-hidden="true">→</span>
+              </span>
+            </div>
+
+            <ul class="alert-list">
+              <li>
+                <span class="alert-symbol critical" aria-hidden="true">!</span>
+                <div>
+                  <strong>Temperature threshold exceeded</strong>
+                  <p>SDR-HCM-04 · 72°C · 2 min</p>
+                </div>
+              </li>
+              <li>
+                <span class="alert-symbol warning" aria-hidden="true">⌁</span>
+                <div>
+                  <strong>SDR-DN-02 heartbeat lost</strong>
+                  <p>No heartbeat · 8 min</p>
+                </div>
+              </li>
+              <li>
+                <span class="alert-symbol warning" aria-hidden="true">!</span>
+                <div>
+                  <strong>Job RC-108 verifying</strong>
+                  <p>Canary deployment · 14 min</p>
+                </div>
+              </li>
+            </ul>
+          </article>
+        </section>
+
+        <footer class="page-footer">
+          <p>SDR Management · Simulator environment</p>
+          <p>Last synchronized 5 seconds ago</p>
+        </footer>
+        </main>
+      </div>
+    </div>
   </body>
 </html>
