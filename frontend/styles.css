@@ -606,7 +606,7 @@ select:focus-visible,
 }
 
 .time-range select {
-  min-width: 92px;
+  min-width: 122px;
   height: 30px;
   padding: 0 28px 0 10px;
   color: var(--slate-700);
@@ -615,6 +615,12 @@ select:focus-visible,
   background-color: #f7f9fc;
   border: 1px solid var(--slate-200);
   border-radius: 7px;
+}
+
+.time-range select:disabled {
+  color: var(--slate-500);
+  cursor: wait;
+  opacity: 0.75;
 }
 
 .chart-legend {
@@ -642,10 +648,75 @@ select:focus-visible,
 .legend-dot.throughput { background: var(--blue-500); }
 .legend-dot.snr { background: var(--cyan-500); }
 
+.performance-chart-shell {
+  position: relative;
+  min-height: 230px;
+}
+
+.performance-loading,
+.performance-message {
+  display: grid;
+  min-height: 230px;
+  place-items: center;
+  align-content: center;
+  color: var(--slate-500);
+  font-size: 10px;
+  text-align: center;
+}
+
+.performance-loading[hidden],
+.performance-message[hidden],
+.line-chart[hidden],
+.performance-note[hidden] {
+  display: none;
+}
+
+.performance-loading {
+  gap: 12px;
+}
+
+.chart-skeleton {
+  width: min(100%, 460px);
+  height: 130px;
+  background:
+    linear-gradient(110deg, transparent 25%, rgb(255 255 255 / 0.7) 40%, transparent 55%) 0 0 / 200% 100%,
+    repeating-linear-gradient(to bottom, #edf1f6 0 1px, transparent 1px 43px),
+    linear-gradient(155deg, transparent 47%, #dbe8ff 48% 50%, transparent 51%);
+  border-radius: 8px;
+  animation: chart-loading 1.25s linear infinite;
+}
+
+.performance-message {
+  gap: 7px;
+}
+
+.performance-message-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 4px;
+  color: #986c00;
+  font-size: 12px;
+  font-weight: 800;
+  background: #fff6dc;
+  border-radius: 50%;
+  place-items: center;
+}
+
+.performance-message strong {
+  color: var(--slate-950);
+  font-size: 11px;
+}
+
+.performance-message p {
+  max-width: 360px;
+  margin-bottom: 3px;
+}
+
 .line-chart {
   position: relative;
   height: 230px;
-  padding: 6px 0 20px 30px;
+  padding: 6px 34px 20px;
 }
 
 .line-chart svg {
@@ -653,6 +724,17 @@ select:focus-visible,
   height: 100%;
   overflow: visible;
 }
+
+.axis-title {
+  position: absolute;
+  top: -2px;
+  color: var(--slate-500);
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.axis-title-throughput { left: 0; }
+.axis-title-snr { right: 0; }
 
 .chart-grid line {
   stroke: #edf1f6;
@@ -675,9 +757,20 @@ select:focus-visible,
 .throughput-line { stroke: var(--blue-500); }
 .snr-line { stroke: var(--cyan-500); stroke-width: 2.3; }
 
+.chart-hit-area {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+.chart-hit-area:focus {
+  fill: rgb(37 99 235 / 0.05);
+  outline: none;
+}
+
 .y-axis {
   position: absolute;
-  inset: 7px auto 25px 0;
+  top: 24px;
+  bottom: 32px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -685,15 +778,53 @@ select:focus-visible,
   font-size: 8px;
 }
 
+.y-axis-throughput { left: 0; }
+.y-axis-snr { right: 0; text-align: right; }
+
 .x-axis {
   position: absolute;
   right: 0;
   bottom: 0;
-  left: 30px;
+  left: 34px;
+  right: 34px;
   display: flex;
   justify-content: space-between;
   color: #a3adbb;
   font-size: 8px;
+}
+
+.chart-tooltip {
+  position: absolute;
+  z-index: 2;
+  top: 32px;
+  left: var(--tooltip-position, 50%);
+  display: grid;
+  gap: 3px;
+  min-width: 142px;
+  padding: 8px 10px;
+  color: var(--slate-700);
+  font-size: 9px;
+  line-height: 1.4;
+  pointer-events: none;
+  background: rgb(255 255 255 / 0.96);
+  border: 1px solid var(--slate-200);
+  border-radius: 7px;
+  box-shadow: 0 8px 24px rgb(20 32 51 / 0.12);
+  transform: translateX(-50%);
+}
+
+.chart-tooltip[hidden] { display: none; }
+
+.chart-tooltip strong { color: var(--slate-950); }
+
+.performance-note {
+  margin: -2px 0 0;
+  color: #986c00;
+  font-size: 9px;
+}
+
+@keyframes chart-loading {
+  to { background-position: -200% 0, 0 0, 0 0; }
 }
 
 .health-content {
@@ -1099,6 +1230,8 @@ td small {
   *,
   *::before,
   *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
