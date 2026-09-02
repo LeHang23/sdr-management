@@ -1,3 +1,5 @@
+import { initSystemPerformance } from './system-performance.js';
+
 const endpoint = '/api/v1/overview/summary';
 const refreshIntervalMs = 5_000;
 const cacheKey = 'sdr-management.overview-summary.v1';
@@ -157,5 +159,6 @@ async function refreshSummary() {
 }
 
 retryButton.addEventListener('click', refreshSummary);
+initSystemPerformance();
 refreshSummary();
 window.setInterval(refreshSummary, refreshIntervalMs);

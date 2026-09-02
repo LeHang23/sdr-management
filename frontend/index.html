@@ -158,48 +158,47 @@
             <div class="card-header">
               <div>
                 <h2>System performance</h2>
-                <p>Last 6 hours · 19 devices online on average</p>
+                <p id="performance-summary">Loading simulated telemetry…</p>
               </div>
               <label class="time-range">
                 <span class="sr-only">Performance time range</span>
-                <select aria-label="Performance time range">
-                  <option>1H</option>
-                  <option selected>6H</option>
-                  <option>24H</option>
+                <select id="performance-range" aria-label="Performance time range">
+                  <option value="1h">Last 1 hour</option>
+                  <option value="6h" selected>Last 6 hours</option>
+                  <option value="24h">Last 24 hours</option>
                 </select>
               </label>
             </div>
 
-            <div class="chart-legend" aria-hidden="true">
+            <div class="chart-legend">
               <span><i class="legend-dot throughput"></i>Throughput (Mbps)</span>
               <span><i class="legend-dot snr"></i>SNR (dB)</span>
             </div>
 
-            <div class="line-chart" role="img" aria-label="Throughput and SNR trend chart from 06:00 to 12:00">
-              <div class="y-axis" aria-hidden="true">
-                <span>80</span><span>60</span><span>40</span><span>20</span>
+            <div class="performance-chart-shell" id="performance-chart-shell" aria-live="polite">
+              <div class="performance-loading" id="performance-loading" role="status">
+                <span class="chart-skeleton"></span>
+                <span>Loading performance data…</span>
               </div>
-              <svg viewBox="0 0 760 220" preserveAspectRatio="none" aria-hidden="true">
-                <defs>
-                  <linearGradient id="throughput-fill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#2563eb" stop-opacity="0.20" />
-                    <stop offset="100%" stop-color="#2563eb" stop-opacity="0" />
-                  </linearGradient>
-                </defs>
-                <g class="chart-grid">
-                  <line x1="0" y1="22" x2="760" y2="22" />
-                  <line x1="0" y1="72" x2="760" y2="72" />
-                  <line x1="0" y1="122" x2="760" y2="122" />
-                  <line x1="0" y1="172" x2="760" y2="172" />
-                </g>
-                <path class="area" d="M0 150 L70 136 L140 145 L210 116 L280 124 L350 88 L420 103 L490 70 L560 86 L630 52 L700 68 L760 34 L760 205 L0 205 Z" />
-                <polyline class="throughput-line" points="0,150 70,136 140,145 210,116 280,124 350,88 420,103 490,70 560,86 630,52 700,68 760,34" />
-                <polyline class="snr-line" points="0,184 70,176 140,182 210,163 280,169 350,146 420,154 490,136 560,144 630,127 700,135 760,118" />
-              </svg>
-              <div class="x-axis" aria-hidden="true">
-                <span>06:00</span><span>07:30</span><span>09:00</span><span>10:30</span><span>12:00</span>
+
+              <div class="performance-message" id="performance-message" hidden>
+                <span class="performance-message-icon" aria-hidden="true">!</span>
+                <strong id="performance-message-title"></strong>
+                <p id="performance-message-copy"></p>
+                <button class="summary-retry" id="performance-retry" type="button">Retry</button>
+              </div>
+
+              <div class="line-chart" id="performance-chart" hidden>
+                <div class="axis-title axis-title-throughput" aria-hidden="true">Mbps</div>
+                <div class="axis-title axis-title-snr" aria-hidden="true">dB</div>
+                <div class="y-axis y-axis-throughput" id="throughput-axis" aria-hidden="true"></div>
+                <svg id="performance-svg" viewBox="0 0 760 220" preserveAspectRatio="none" role="group"></svg>
+                <div class="y-axis y-axis-snr" id="snr-axis" aria-hidden="true"></div>
+                <div class="x-axis" id="performance-time-axis" aria-hidden="true"></div>
+                <div class="chart-tooltip" id="performance-tooltip" role="status" hidden></div>
               </div>
             </div>
+            <p class="performance-note" id="performance-note" hidden></p>
           </article>
 
           <article class="card health-card">
