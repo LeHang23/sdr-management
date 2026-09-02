@@ -105,13 +105,17 @@ HTML/CSS prototypes must be honest about behavior:
 
 ## 8. Local verification checklist
 
-1. Start a local HTTP server from the project root:
+1. Start the Node.js application server from the project root when the page
+   fetches backend data:
 
    ```powershell
-   python -m http.server 4173 --directory frontend
+   npm.cmd start
    ```
 
-2. Confirm `http://127.0.0.1:4173/` returns HTTP 200.
+   A standalone static server is appropriate only for pages without API calls.
+
+2. Confirm [http://localhost:4173/](http://localhost:4173/) and its API endpoint
+   `http://localhost:4173/api/v1/overview/summary` return HTTP 200.
 3. Render the page at `1440 x 1024` and compare hierarchy, spacing, colors,
    labels, and information density with Figma.
 4. Render at 1024px wide and confirm there is no unusable overlap or clipping.

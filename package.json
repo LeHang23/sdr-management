@@ -1,0 +1,14 @@
+{
+  "name": "sdr-management",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "dev": "node --watch backend/src/server.js",
+    "db:init": "node backend/scripts/database-cli.js init",
+    "db:seed": "node backend/scripts/database-cli.js seed",
+    "test": "node --test backend/test/*.test.js",
+    "validate": "powershell -ExecutionPolicy Bypass -File ai-skills/sdr-frontend/scripts/validate_frontend.ps1 && powershell -ExecutionPolicy Bypass -File ai-skills/sdr-backend/scripts/validate_backend.ps1"
+  }
+}

@@ -65,8 +65,10 @@ as code to paste unchanged.
    required by SRS. Do not make an unavailable destination look functional.
 5. Keep navigation and actions honest: valid links must resolve, planned screens
    should be visibly disabled, and buttons must use the correct element type.
-6. Verify locally through HTTP, then inspect the rendered screen in a browser at
-   the primary Figma size and the minimum supported desktop width.
+6. Verify locally through the Node.js application server when the screen uses
+   an API, then inspect the rendered screen in a browser at the primary Figma
+   size and the minimum supported desktop width. Do not use a standalone static
+   server for API-backed screens.
 7. Fix console errors, overflow, clipped content, broken anchors, inaccessible
    controls, and meaningful design mismatches before handoff.
 8. Run the deterministic checks:

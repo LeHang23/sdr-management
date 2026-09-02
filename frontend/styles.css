@@ -504,6 +504,63 @@ select:focus-visible,
 .metric-note.positive span { color: var(--green-600); }
 .metric-note.warning span { color: var(--amber-500); }
 
+.kpi-card.is-loading .kpi-value {
+  width: 56px;
+  height: 23px;
+  color: transparent;
+  background: linear-gradient(90deg, #edf1f6 25%, #f8fafc 50%, #edf1f6 75%);
+  background-size: 200% 100%;
+  border-radius: 5px;
+  animation: summary-loading 1.2s ease-in-out infinite;
+}
+
+.kpi-card.is-loading .metric-note {
+  width: 120px;
+  height: 12px;
+  color: transparent;
+  background: #eef3f8;
+  border-radius: 4px;
+}
+
+.kpi-card.is-unavailable .kpi-value,
+.kpi-card.is-unavailable .metric-note {
+  color: var(--slate-500);
+}
+
+.kpi-card.is-stale {
+  border-color: #f0d79a;
+}
+
+.fleet-summary-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 18px;
+  margin: -10px 2px 14px;
+  color: var(--slate-500);
+  font-size: 10px;
+}
+
+.summary-retry {
+  padding: 3px 8px;
+  color: var(--blue-600);
+  font: inherit;
+  font-weight: 700;
+  background: var(--white);
+  border: 1px solid var(--slate-200);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.summary-retry:focus-visible {
+  outline: 3px solid rgb(37 99 235 / 0.25);
+  outline-offset: 2px;
+}
+
+@keyframes summary-loading {
+  to { background-position: -200% 0; }
+}
+
 .analytics-grid,
 .details-grid {
   display: grid;
