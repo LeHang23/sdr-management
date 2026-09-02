@@ -69,11 +69,11 @@
           </span>
         </nav>
 
-        <section class="simulator-card" aria-label="Simulator environment">
+        <section class="simulator-card" aria-label="Current fleet data source">
           <div class="simulator-title">
-            <strong>Simulation engine</strong>
+            <strong id="fleet-source-title">Fleet data source</strong>
           </div>
-          <p>24 virtual devices streaming telemetry every 5 seconds.</p>
+          <p id="fleet-source-copy">Loading fleet data…</p>
         </section>
       </aside>
 
@@ -100,7 +100,7 @@
           <div>
             <h1>Operations overview</h1>
             <p class="page-subtitle">
-              Saturday, Aug 29, 2026 · Data from SDR Simulator
+              Saturday, Aug 29, 2026 · <span id="overview-source-label">Loading data source…</span>
             </p>
           </div>
           <div class="header-actions">
@@ -111,43 +111,47 @@
           </div>
         </header>
 
-        <section class="kpi-grid" aria-label="Fleet summary">
-          <article class="card kpi-card">
+        <section class="kpi-grid" id="fleet-summary" aria-label="Fleet summary" aria-busy="true">
+          <article class="card kpi-card is-loading" data-kpi-card="totalDevices">
             <div class="kpi-heading">
               <p>Total devices</p>
               <span class="metric-icon blue" aria-hidden="true">▣</span>
             </div>
-            <strong class="kpi-value">24</strong>
-            <p class="metric-note positive"><span>+3</span> this month</p>
+            <strong class="kpi-value" data-kpi-value>—</strong>
+            <p class="metric-note" data-kpi-note>Loading…</p>
           </article>
 
-          <article class="card kpi-card">
+          <article class="card kpi-card is-loading" data-kpi-card="onlineNow">
             <div class="kpi-heading">
               <p>Online now</p>
               <span class="metric-icon green" aria-hidden="true">◉</span>
             </div>
-            <strong class="kpi-value">19</strong>
-            <p class="metric-note positive"><span>79.2%</span> fleet availability</p>
+            <strong class="kpi-value" data-kpi-value>—</strong>
+            <p class="metric-note" data-kpi-note>Loading…</p>
           </article>
 
-          <article class="card kpi-card">
+          <article class="card kpi-card is-loading" data-kpi-card="needsAttention">
             <div class="kpi-heading">
               <p>Needs attention</p>
               <span class="metric-icon amber" aria-hidden="true">△</span>
             </div>
-            <strong class="kpi-value">5</strong>
-            <p class="metric-note warning"><span>3 alerts</span> · 2 offline</p>
+            <strong class="kpi-value" data-kpi-value>—</strong>
+            <p class="metric-note" data-kpi-note>Loading…</p>
           </article>
 
-          <article class="card kpi-card">
+          <article class="card kpi-card is-loading" data-kpi-card="activeJobs">
             <div class="kpi-heading">
               <p>Active jobs</p>
               <span class="metric-icon cyan" aria-hidden="true">↻</span>
             </div>
-            <strong class="kpi-value">3</strong>
-            <p class="metric-note"><span>2 deploying</span> · 1 verifying</p>
+            <strong class="kpi-value" data-kpi-value>—</strong>
+            <p class="metric-note" data-kpi-note>Loading…</p>
           </article>
         </section>
+        <div class="fleet-summary-status" aria-live="polite">
+          <span id="fleet-summary-source">Loading fleet summary…</span>
+          <button class="summary-retry" id="fleet-summary-retry" type="button" hidden>Retry</button>
+        </div>
 
         <section class="analytics-grid" aria-label="System analytics">
           <article class="card performance-card" id="monitoring">
@@ -206,16 +210,16 @@
               </div>
             </div>
             <div class="health-content">
-              <div class="donut-wrap" role="img" aria-label="79 percent of fleet is healthy">
+              <div class="donut-wrap" role="img" aria-label="67 percent of fleet is healthy">
                 <div class="donut-chart">
                   <div class="donut-center">
-                    <strong>79%</strong>
+                  <strong>67%</strong>
                     <span>Healthy</span>
                   </div>
                 </div>
               </div>
               <ul class="health-legend">
-                <li><span><i class="health-dot online"></i>Online</span><strong>19</strong></li>
+                <li><span><i class="health-dot online"></i>Online</span><strong>16</strong></li>
                 <li><span><i class="health-dot warning"></i>Warning</span><strong>3</strong></li>
                 <li><span><i class="health-dot offline"></i>Offline</span><strong>2</strong></li>
                 <li><span><i class="health-dot updating"></i>Updating</span><strong>3</strong></li>
@@ -324,11 +328,12 @@
         </section>
 
         <footer class="page-footer">
-          <p>SDR Management · Simulator environment</p>
-          <p>Last synchronized 5 seconds ago</p>
+          <p>SDR Management · <span id="overview-footer-source">Loading data source…</span></p>
+          <p id="overview-last-synchronized">Waiting for first snapshot…</p>
         </footer>
         </main>
       </div>
     </div>
+    <script type="module" src="scripts/overview.js"></script>
   </body>
 </html>

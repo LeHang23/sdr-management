@@ -14,6 +14,7 @@ sdr-management/
 |-- ai-skills/                 Project-specific AI workflows
 |-- design/                    Figma links only
 |-- frontend/                  Static HTML/CSS interface prototype
+|-- backend/                   Node.js API and local SQLite data model
 `-- docs/
     |-- requirements/
     |   |-- FBS.md             English feature breakdown
@@ -79,14 +80,59 @@ The first designed frame combines the Admin Dashboard shell with the Overview
 page. Their requirements are tracked in separate screen folders. See
 [`design/DESIGN-LINKS.md`](design/DESIGN-LINKS.md) for the Figma reference.
 
-## Local frontend preview
+## Local application preview
 
-The current prototype renders the Admin Dashboard shell with Overview active,
-using plain HTML and CSS in `frontend/`.
-Run it locally from the project root:
+The Overview frontend now reads Fleet Summary through the Node.js API, so run
+the application server rather than a standalone static Python server:
 
 ```powershell
-python -m http.server 4173 --directory frontend
+npm.cmd start
 ```
 
-Then open `http://127.0.0.1:4173/`.
+Then open [http://localhost:4173/](http://localhost:4173/). A static server can render the page but
+cannot serve `/api/v1/overview/summary`, so the KPI cards will be unavailable.
+
+## Local backend and manual simulator data
+
+Fleet Summary reads from a Node.js API and a local SQLite database. No physical
+SDR is required: enter or edit simulator records directly in
+`backend/data/sdr-management.db` with a SQLite editor, or start with the
+tracked seed data. Use `backend/database/manual-entry.sql` as a safe copy/paste
+template for a device, issue, or reconfiguration job.
+
+```powershell
+npm.cmd run db:init
+npm.cmd run db:seed
+npm.cmd start
+```
+
+Open [http://localhost:4173/](http://localhost:4173/). If that port is already
+in use, choose another one for the current PowerShell session, for example:
+
+```powershell
+$env:PORT = '4174'
+npm.cmd start
+```
+
+Then open [http://localhost:4174/](http://localhost:4174/).
+
+The SQLite binary file is ignored by Git. The tables `devices`,
+`device_issues`, and `reconfiguration_jobs` are intentionally also the future
+integration boundary for an SDR Gateway: real telemetry will update those rows
+with source `sdr_gateway`, and the existing Overview API will return the actual
+counts without a frontend change.
+
+## Backend skill
+
+Use the project skill for Node.js APIs, SQLite schema changes, manual simulator
+data, or future SDR Gateway ingestion:
+
+```text
+Use $sdr-backend to add an API for Device Management.
+```
+
+The skill is stored in `ai-skills/sdr-backend/` and validates the backend with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File ai-skills/sdr-backend/scripts/validate_backend.ps1
+```

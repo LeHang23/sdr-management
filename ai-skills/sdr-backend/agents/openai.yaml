@@ -1,0 +1,7 @@
+interface:
+  display_name: "SDR Backend"
+  short_description: "Build Node.js backend for SDR Management"
+  default_prompt: "Use $sdr-backend to implement the Overview API from manual SQLite data."
+
+policy:
+  allow_implicit_invocation: true
