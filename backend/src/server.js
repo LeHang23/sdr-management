@@ -5,6 +5,7 @@ import { dirname, extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { openDatabase, migrateDatabase, seedDatabase } from './database.js';
 import { getOverviewSummary } from './overview-summary.js';
+import { getSystemPerformance, PERFORMANCE_RANGES } from './system-performance.js';
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const rootDirectory = resolve(currentDirectory, '../..');
@@ -73,6 +74,30 @@ const server = createServer(async (request, response) => {
     } catch (error) {
       console.error('Could not build overview summary', error);
       sendJson(response, 500, { error: 'Overview summary unavailable' });
+    }
+    return;
+  }
+  if (request.method === 'GET' && url.pathname === '/api/v1/overview/performance') {
+    const rangeKey = url.searchParams.get('range') ?? '6h';
+    if (!PERFORMANCE_RANGES[rangeKey]) {
+      sendJson(response, 400, {
+        error: 'Unsupported performance range',
+        supportedRanges: Object.keys(PERFORMANCE_RANGES),
+      });
+      return;
+    }
+    try {
+      const performance = getSystemPerformance(database, rangeKey);
+      const etag = `\"${performance.snapshotId}\"`;
+      if (request.headers['if-none-match'] === etag) {
+        response.writeHead(304, { ETag: etag, 'Cache-Control': 'no-store' });
+        response.end();
+        return;
+      }
+      sendJson(response, 200, performance, { ETag: etag });
+    } catch (error) {
+      console.error('Could not build system performance snapshot', error);
+      sendJson(response, 500, { error: 'System performance unavailable' });
     }
     return;
   }

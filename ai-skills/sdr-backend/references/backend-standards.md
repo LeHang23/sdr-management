@@ -18,6 +18,7 @@ future SDR Gateway ingestion.
 | `devices` | Device identity, connection and health state | Manual entry or SDR Gateway |
 | `device_issues` | Active/resolved device findings | Manual entry or SDR Gateway |
 | `reconfiguration_jobs` | Reconfiguration lifecycle | Manual entry or job service |
+| `device_telemetry` | Time-series Throughput and SNR samples per device | Manual entry or SDR Gateway |
 | `overview_metadata` | Revision used to identify a coherent snapshot | Database triggers |
 
 `source` is `manual` for locally entered simulator data and `sdr_gateway` for
@@ -63,10 +64,18 @@ device count: Warning or Offline devices plus any device with an active critical
 issue, without double counting. A zero count is valid only when the relevant
 table/query is available and empty.
 
+`GET /api/v1/overview/performance?range=6h` accepts `1h`, `6h`, or `24h` and
+returns 13 aggregate chart buckets. Each point contains `throughputMbps`,
+`snrDb`, and `onlineDevices`. Missing metric values remain `null`; they must not
+be converted to zero. The response identifies its source and reports the raw
+sample count and whether the range is partial.
+
 ## SDR Gateway handoff
 
 When physical SDR data exists, add an ingestion adapter that validates external
 telemetry, maps it to the status vocabulary above, and upserts it in a single
-transaction. Do not change the Overview API or make the frontend understand the
+transaction. Store accepted Throughput and SNR samples in `device_telemetry`
+with their original device identifier and source. Do not change the Overview
+API or make the frontend understand the
 SDR protocol. Preserve original device identifiers in `devices.id` and update
 `last_seen_at` on each accepted telemetry record.

@@ -3,51 +3,38 @@ const ranges = {
   '6h': { label: 'Last 6 hours', points: 13, stepMinutes: 30 },
   '24h': { label: 'Last 24 hours', points: 13, stepMinutes: 120 },
 };
+const endpoint = '/api/v1/overview/performance';
 
 const chartWidth = 760;
 const chartHeight = 220;
 const plotTop = 18;
 const plotBottom = 198;
 
-function seededValue(index, rangeFactor, offset) {
-  return Math.sin(index * 1.17 + rangeFactor + offset) + Math.cos(index * 0.53 + offset) * 0.55;
+function isValidPerformance(performance) {
+  return Boolean(
+    performance &&
+      performance.range &&
+      performance.source &&
+      performance.summary &&
+      Array.isArray(performance.points) &&
+      performance.points.every((point) =>
+        typeof point.timestamp === 'string' &&
+        (point.throughputMbps === null || Number.isFinite(point.throughputMbps)) &&
+        (point.snrDb === null || Number.isFinite(point.snrDb)) &&
+        Number.isFinite(point.onlineDevices),
+      ),
+  );
 }
 
-function buildSimulatedTelemetry(rangeKey) {
-  const config = ranges[rangeKey];
-  const now = new Date();
-  const rangeFactor = config.stepMinutes / 30;
-  const points = Array.from({ length: config.points }, (_, index) => {
-    const timestamp = new Date(now.getTime() - (config.points - index - 1) * config.stepMinutes * 60_000);
-    const signal = seededValue(index, rangeFactor, 0.4);
-    return {
-      timestamp: timestamp.toISOString(),
-      throughputMbps: Number((56 + index * 1.25 + signal * 7.5).toFixed(1)),
-      snrDb: Number((18.5 + index * 0.28 + seededValue(index, rangeFactor, 1.7) * 2.1).toFixed(1)),
-    };
+async function fetchPerformance(rangeKey, signal) {
+  const response = await fetch(`${endpoint}?range=${encodeURIComponent(rangeKey)}`, {
+    headers: { Accept: 'application/json' },
+    signal,
   });
-
-  const requestedState = new URLSearchParams(window.location.search).get('performanceState');
-  if (requestedState === 'empty') return [];
-  if (requestedState === 'partial') {
-    points[3].snrDb = null;
-    points[8].throughputMbps = null;
-  }
-  return points;
-}
-
-async function fetchSimulatedTelemetry(rangeKey, signal) {
-  await new Promise((resolve, reject) => {
-    const timeout = window.setTimeout(resolve, 420);
-    signal.addEventListener('abort', () => {
-      window.clearTimeout(timeout);
-      reject(new DOMException('Request aborted', 'AbortError'));
-    }, { once: true });
-  });
-  if (new URLSearchParams(window.location.search).get('performanceState') === 'error') {
-    throw new Error('Simulated telemetry is unavailable');
-  }
-  return buildSimulatedTelemetry(rangeKey);
+  if (!response.ok) throw new Error(`System Performance API returned ${response.status}`);
+  const performance = await response.json();
+  if (!isValidPerformance(performance)) throw new Error('System Performance API returned an invalid snapshot');
+  return performance;
 }
 
 function createSvgElement(name, attributes = {}) {
@@ -58,6 +45,7 @@ function createSvgElement(name, attributes = {}) {
 
 function getScale(values, padding = 0.12) {
   const validValues = values.filter(Number.isFinite);
+  if (validValues.length === 0) return { min: 0, max: 4, step: 1 };
   const minimum = Math.min(...validValues);
   const maximum = Math.max(...validValues);
   const span = Math.max(maximum - minimum, 1);
@@ -118,7 +106,7 @@ export function initSystemPerformance() {
     message.hidden = true;
     chart.hidden = true;
     note.hidden = true;
-    summary.textContent = `Loading ${ranges[rangeSelect.value].label.toLowerCase()} of simulated telemetry…`;
+    summary.textContent = `Loading ${ranges[rangeSelect.value].label.toLowerCase()} of telemetry…`;
     return requestController.signal;
   }
 
@@ -129,16 +117,17 @@ export function initSystemPerformance() {
     messageTitle.textContent = title;
     messageCopy.textContent = copy;
     retry.hidden = !canRetry;
-    summary.textContent = 'Simulated telemetry unavailable';
+    summary.textContent = 'Telemetry unavailable';
   }
 
-  function render(points) {
+  function render(performance) {
+    const { points } = performance;
     const throughputValues = points.map((point) => point.throughputMbps);
     const snrValues = points.map((point) => point.snrDb);
     const throughputScale = getScale(throughputValues);
     const snrScale = getScale(snrValues);
-    const isPartial = [...throughputValues, ...snrValues].some((value) => !Number.isFinite(value));
-    const averageOnline = Math.round(18 + points.length / 12);
+    const isPartial = performance.summary.partial;
+    const averageOnline = performance.summary.averageOnlineDevices;
 
     svg.replaceChildren();
     const title = createSvgElement('title');
@@ -209,7 +198,7 @@ export function initSystemPerformance() {
     loading.hidden = true;
     message.hidden = true;
     chart.hidden = false;
-    summary.textContent = `${ranges[rangeSelect.value].label} · ${averageOnline} devices online on average · Simulated`;
+    summary.textContent = `${performance.range.label} · ${averageOnline} devices online on average · ${performance.source.label}`;
     note.textContent = 'Some telemetry samples are unavailable. Available data remains visible.';
     note.hidden = !isPartial;
   }
@@ -217,14 +206,17 @@ export function initSystemPerformance() {
   async function refresh() {
     const signal = setLoading();
     try {
-      const points = await fetchSimulatedTelemetry(rangeSelect.value, signal);
-      if (points.length === 0) {
-        showMessage('No performance data', 'No simulated telemetry was recorded for this time range.', false);
+      const performance = await fetchPerformance(rangeSelect.value, signal);
+      if (performance.points.length === 0) {
+        showMessage('No performance data', 'No telemetry was recorded for this time range.', false);
         return;
       }
-      render(points);
+      render(performance);
     } catch (error) {
-      if (error.name !== 'AbortError') showMessage('Performance data unavailable', 'Could not load simulated telemetry. Try again.', true);
+      if (error.name !== 'AbortError') {
+        showMessage('Performance data unavailable', 'Could not load telemetry from the server. Try again.', true);
+        console.error('Could not refresh system performance', error);
+      }
     } finally {
       if (!signal.aborted) rangeSelect.disabled = false;
     }

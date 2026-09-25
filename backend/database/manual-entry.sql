@@ -43,3 +43,23 @@ ON CONFLICT(id) DO UPDATE SET
   source = excluded.source,
   status = excluded.status,
   updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now');
+
+-- Add or update one telemetry sample. Either Throughput or SNR may be NULL
+-- when a device reports only part of a sample, but both cannot be NULL.
+INSERT INTO device_telemetry (
+  device_id,
+  sampled_at,
+  source,
+  throughput_mbps,
+  snr_db
+) VALUES (
+  'SDR-NEW-001',
+  strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
+  'manual',
+  64.2,
+  21.8
+)
+ON CONFLICT(device_id, sampled_at) DO UPDATE SET
+  source = excluded.source,
+  throughput_mbps = excluded.throughput_mbps,
+  snr_db = excluded.snr_db;

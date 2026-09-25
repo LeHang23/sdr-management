@@ -82,7 +82,8 @@ page. Their requirements are tracked in separate screen folders. See
 
 ## Local application preview
 
-The Overview frontend now reads Fleet Summary through the Node.js API, so run
+The Overview frontend now reads Fleet Summary and System Performance through
+the Node.js API, so run
 the application server rather than a standalone static Python server:
 
 ```powershell
@@ -90,15 +91,16 @@ npm.cmd start
 ```
 
 Then open [http://localhost:4173/](http://localhost:4173/). A static server can render the page but
-cannot serve `/api/v1/overview/summary`, so the KPI cards will be unavailable.
+cannot serve `/api/v1/overview/summary` or `/api/v1/overview/performance`, so
+the KPI cards and performance chart will be unavailable.
 
 ## Local backend and manual simulator data
 
-Fleet Summary reads from a Node.js API and a local SQLite database. No physical
+Fleet Summary and System Performance read from a Node.js API and a local SQLite database. No physical
 SDR is required: enter or edit simulator records directly in
 `backend/data/sdr-management.db` with a SQLite editor, or start with the
 tracked seed data. Use `backend/database/manual-entry.sql` as a safe copy/paste
-template for a device, issue, or reconfiguration job.
+template for a device, issue, reconfiguration job, or telemetry sample.
 
 ```powershell
 npm.cmd run db:init
@@ -117,10 +119,10 @@ npm.cmd start
 Then open [http://localhost:4174/](http://localhost:4174/).
 
 The SQLite binary file is ignored by Git. The tables `devices`,
-`device_issues`, and `reconfiguration_jobs` are intentionally also the future
-integration boundary for an SDR Gateway: real telemetry will update those rows
-with source `sdr_gateway`, and the existing Overview API will return the actual
-counts without a frontend change.
+`device_issues`, `reconfiguration_jobs`, and `device_telemetry` are intentionally
+also the future integration boundary for an SDR Gateway: real telemetry will
+update those rows with source `sdr_gateway`, and the existing Overview APIs will
+return the actual counts and performance trends without a frontend change.
 
 ## Backend skill
 

@@ -29,6 +29,20 @@ CREATE TABLE IF NOT EXISTS reconfiguration_jobs (
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 
+CREATE TABLE IF NOT EXISTS device_telemetry (
+  device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+  sampled_at TEXT NOT NULL,
+  source TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('manual', 'sdr_gateway')),
+  throughput_mbps REAL CHECK (throughput_mbps IS NULL OR throughput_mbps >= 0),
+  snr_db REAL,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  PRIMARY KEY (device_id, sampled_at),
+  CHECK (throughput_mbps IS NOT NULL OR snr_db IS NOT NULL)
+);
+
+CREATE INDEX IF NOT EXISTS device_telemetry_sampled_at_idx
+ON device_telemetry (sampled_at);
+
 CREATE TABLE IF NOT EXISTS overview_metadata (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL,
@@ -96,6 +110,24 @@ END;
 
 CREATE TRIGGER IF NOT EXISTS jobs_revision_after_delete
 AFTER DELETE ON reconfiguration_jobs
+BEGIN
+  UPDATE overview_metadata SET value = CAST(value AS INTEGER) + 1, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE key = 'revision';
+END;
+
+CREATE TRIGGER IF NOT EXISTS telemetry_revision_after_insert
+AFTER INSERT ON device_telemetry
+BEGIN
+  UPDATE overview_metadata SET value = CAST(value AS INTEGER) + 1, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE key = 'revision';
+END;
+
+CREATE TRIGGER IF NOT EXISTS telemetry_revision_after_update
+AFTER UPDATE ON device_telemetry
+BEGIN
+  UPDATE overview_metadata SET value = CAST(value AS INTEGER) + 1, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE key = 'revision';
+END;
+
+CREATE TRIGGER IF NOT EXISTS telemetry_revision_after_delete
+AFTER DELETE ON device_telemetry
 BEGIN
   UPDATE overview_metadata SET value = CAST(value AS INTEGER) + 1, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE key = 'revision';
 END;

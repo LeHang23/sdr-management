@@ -8,8 +8,10 @@ try {
     'backend/database/schema.sql',
     'backend/src/database.js',
     'backend/src/overview-summary.js',
+    'backend/src/system-performance.js',
     'backend/src/server.js',
-    'backend/test/overview-summary.test.js'
+    'backend/test/overview-summary.test.js',
+    'backend/test/system-performance.test.js'
   )
 
   foreach ($requiredFile in $requiredFiles) {
@@ -20,6 +22,7 @@ try {
 
   node --check backend/src/server.js
   node --check backend/src/overview-summary.js
+  node --check backend/src/system-performance.js
   npm.cmd run test
   Write-Output 'Backend validation passed.'
 } finally {
