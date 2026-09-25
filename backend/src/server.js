@@ -3,8 +3,9 @@ import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { openDatabase, migrateDatabase } from './database.js';
+import { openDatabase, migrateDatabase, seedDatabase } from './database.js';
 import { getOverviewSummary } from './overview-summary.js';
+import { getSystemPerformance, PERFORMANCE_RANGES } from './system-performance.js';
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const rootDirectory = resolve(currentDirectory, '../..');
@@ -14,6 +15,10 @@ const host = process.env.HOST ?? '127.0.0.1';
 const port = Number(process.env.PORT ?? 4173);
 const database = openDatabase(databasePath);
 migrateDatabase(database);
+if (process.env.SDR_SEED_DEMO === 'true') {
+  const deviceCount = Number(database.prepare('SELECT COUNT(*) AS value FROM devices').get().value);
+  if (deviceCount === 0) seedDatabase(database);
+}
 
 const mimeTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -52,6 +57,10 @@ async function serveStatic(pathname, response) {
 
 const server = createServer(async (request, response) => {
   const url = new URL(request.url, `http://${request.headers.host ?? `${host}:${port}`}`);
+  if (request.method === 'GET' && url.pathname === '/health') {
+    sendJson(response, 200, { status: 'ok' });
+    return;
+  }
   if (request.method === 'GET' && url.pathname === '/api/v1/overview/summary') {
     try {
       const summary = getOverviewSummary(database);
@@ -65,6 +74,30 @@ const server = createServer(async (request, response) => {
     } catch (error) {
       console.error('Could not build overview summary', error);
       sendJson(response, 500, { error: 'Overview summary unavailable' });
+    }
+    return;
+  }
+  if (request.method === 'GET' && url.pathname === '/api/v1/overview/performance') {
+    const rangeKey = url.searchParams.get('range') ?? '6h';
+    if (!PERFORMANCE_RANGES[rangeKey]) {
+      sendJson(response, 400, {
+        error: 'Unsupported performance range',
+        supportedRanges: Object.keys(PERFORMANCE_RANGES),
+      });
+      return;
+    }
+    try {
+      const performance = getSystemPerformance(database, rangeKey);
+      const etag = `\"${performance.snapshotId}\"`;
+      if (request.headers['if-none-match'] === etag) {
+        response.writeHead(304, { ETag: etag, 'Cache-Control': 'no-store' });
+        response.end();
+        return;
+      }
+      sendJson(response, 200, performance, { ETag: etag });
+    } catch (error) {
+      console.error('Could not build system performance snapshot', error);
+      sendJson(response, 500, { error: 'System performance unavailable' });
     }
     return;
   }
