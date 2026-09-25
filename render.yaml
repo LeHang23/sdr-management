@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: sdr-management
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: SDR_SEED_DEMO
+        value: "true"

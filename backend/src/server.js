@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { openDatabase, migrateDatabase } from './database.js';
+import { openDatabase, migrateDatabase, seedDatabase } from './database.js';
 import { getOverviewSummary } from './overview-summary.js';
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
@@ -14,6 +14,10 @@ const host = process.env.HOST ?? '127.0.0.1';
 const port = Number(process.env.PORT ?? 4173);
 const database = openDatabase(databasePath);
 migrateDatabase(database);
+if (process.env.SDR_SEED_DEMO === 'true') {
+  const deviceCount = Number(database.prepare('SELECT COUNT(*) AS value FROM devices').get().value);
+  if (deviceCount === 0) seedDatabase(database);
+}
 
 const mimeTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -52,6 +56,10 @@ async function serveStatic(pathname, response) {
 
 const server = createServer(async (request, response) => {
   const url = new URL(request.url, `http://${request.headers.host ?? `${host}:${port}`}`);
+  if (request.method === 'GET' && url.pathname === '/health') {
+    sendJson(response, 200, { status: 'ok' });
+    return;
+  }
   if (request.method === 'GET' && url.pathname === '/api/v1/overview/summary') {
     try {
       const summary = getOverviewSummary(database);

@@ -136,3 +136,13 @@ The skill is stored in `ai-skills/sdr-backend/` and validates the backend with:
 ```powershell
 powershell -ExecutionPolicy Bypass -File ai-skills/sdr-backend/scripts/validate_backend.ps1
 ```
+
+## Free Render preview
+
+The repository includes `render.yaml` for a free Render web service. The cloud
+service listens on Render's assigned `PORT`, exposes `/health` for health
+checks, and seeds demo records when its SQLite database is empty.
+
+The free service filesystem is ephemeral. It is suitable for reviewing the UI
+and API, but manual database changes may be lost after a restart or redeploy.
+Use persistent storage or a managed database before storing important data.
