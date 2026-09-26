@@ -22,7 +22,9 @@ future SDR Gateway ingestion.
 | `overview_metadata` | Revision used to identify a coherent snapshot | Database triggers |
 
 `source` is `manual` for locally entered simulator data and `sdr_gateway` for
-physical SDR-derived records.
+records accepted through the authenticated gateway. API responses derive a
+`simulator` source mode for `SIM-SDR-*` gateway clients so the UI never presents
+remote demo data as physical SDR telemetry.
 
 For manual simulator entry, use `backend/database/manual-entry.sql` as a
 copy/paste template in a SQLite editor. The tracked seed is idempotent and is
@@ -37,6 +39,10 @@ only a starting dataset; runtime database files remain untracked.
 | `device_issues.severity` | `info`, `warning`, `critical` |
 | `device_issues.status` | `active`, `resolved` |
 | `reconfiguration_jobs.status` | `queued`, `deploying`, `verifying`, `retrying`, `succeeded`, `failed`, `cancelled` |
+
+The Overview UI presents `devices.health_status = online` as **Healthy**. This
+health category is intentionally distinct from **Online now**, which counts
+`devices.connection_status = online`.
 
 `queued`, `deploying`, `verifying`, and `retrying` are active jobs. The other
 job states are terminal.
@@ -79,3 +85,9 @@ with their original device identifier and source. Do not change the Overview
 API or make the frontend understand the
 SDR protocol. Preserve original device identifiers in `devices.id` and update
 `last_seen_at` on each accepted telemetry record.
+
+`POST /api/v1/gateway/devices/{deviceId}/heartbeat` accepts a Bearer-authenticated
+heartbeat with an optional telemetry sample. The endpoint is disabled unless
+`SDR_GATEWAY_TOKEN` is configured. Gateway clients never receive database
+access. `SDR_HEARTBEAT_TIMEOUT_MS` controls when an online gateway device is
+marked Offline after it stops reporting.

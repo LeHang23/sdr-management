@@ -8,7 +8,7 @@
       content="SDR Management administrator dashboard prototype"
     />
     <title>SDR Management — Operations overview</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=20260926-health-label" />
   </head>
   <body>
     <div class="app-shell">
@@ -87,7 +87,12 @@
 
           <div class="global-header-actions">
             <button class="icon-button" type="button" aria-label="Search SDR Management">
-              <span class="search-glyph" aria-hidden="true">⌕</span>
+              <span class="search-glyph" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <circle cx="10.5" cy="10.5" r="5.5"></circle>
+                  <path d="m15 15 4 4"></path>
+                </svg>
+              </span>
             </button>
             <button class="profile-button" type="button" aria-label="Open Administrator profile menu">
               <span class="avatar" aria-hidden="true">AD</span>
@@ -105,7 +110,11 @@
           </div>
           <div class="header-actions">
             <button class="primary-button" id="new-reconfiguration" type="button">
-              <span aria-hidden="true">✦</span>
+              <span class="primary-button-icon" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none">
+                  <path d="M8 3.5v9M3.5 8h9"></path>
+                </svg>
+              </span>
               New reconfiguration
             </button>
           </div>
@@ -115,7 +124,12 @@
           <article class="card kpi-card is-loading" data-kpi-card="totalDevices">
             <div class="kpi-heading">
               <p>Total devices</p>
-              <span class="metric-icon blue" aria-hidden="true">▣</span>
+              <span class="metric-icon blue" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <rect x="4" y="5" width="16" height="14" rx="2"></rect>
+                  <path d="M8 9h8M8 13h5"></path>
+                </svg>
+              </span>
             </div>
             <strong class="kpi-value" data-kpi-value>—</strong>
             <p class="metric-note" data-kpi-note>Loading…</p>
@@ -124,7 +138,12 @@
           <article class="card kpi-card is-loading" data-kpi-card="onlineNow">
             <div class="kpi-heading">
               <p>Online now</p>
-              <span class="metric-icon green" aria-hidden="true">◉</span>
+              <span class="metric-icon green" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4"></path>
+                </svg>
+              </span>
             </div>
             <strong class="kpi-value" data-kpi-value>—</strong>
             <p class="metric-note" data-kpi-note>Loading…</p>
@@ -133,7 +152,12 @@
           <article class="card kpi-card is-loading" data-kpi-card="needsAttention">
             <div class="kpi-heading">
               <p>Needs attention</p>
-              <span class="metric-icon amber" aria-hidden="true">△</span>
+              <span class="metric-icon amber" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 4 21 20H3L12 4Z"></path>
+                  <path d="M12 9v5M12 17.5v.1"></path>
+                </svg>
+              </span>
             </div>
             <strong class="kpi-value" data-kpi-value>—</strong>
             <p class="metric-note" data-kpi-note>Loading…</p>
@@ -142,7 +166,11 @@
           <article class="card kpi-card is-loading" data-kpi-card="activeJobs">
             <div class="kpi-heading">
               <p>Active jobs</p>
-              <span class="metric-icon cyan" aria-hidden="true">↻</span>
+              <span class="metric-icon cyan" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M19 7v5h-5M5.6 16.5A8 8 0 0 0 19 12M5 12A8 8 0 0 1 18.4 7.5"></path>
+                </svg>
+              </span>
             </div>
             <strong class="kpi-value" data-kpi-value>—</strong>
             <p class="metric-note" data-kpi-note>Loading…</p>
@@ -201,27 +229,32 @@
             <p class="performance-note" id="performance-note" hidden></p>
           </article>
 
-          <article class="card health-card">
+          <article class="card health-card is-loading" id="fleet-health" aria-busy="true">
             <div class="card-header">
               <div>
                 <h2>Fleet health</h2>
-                <p>Updated at 12:03:45</p>
+                <p id="fleet-health-updated">Loading fleet health…</p>
               </div>
             </div>
             <div class="health-content">
-              <div class="donut-wrap" role="img" aria-label="67 percent of fleet is healthy">
-                <div class="donut-chart">
+              <div
+                class="donut-wrap"
+                id="fleet-health-chart"
+                role="img"
+                aria-label="Fleet health is loading"
+              >
+                <div class="donut-chart" id="fleet-health-donut">
                   <div class="donut-center">
-                  <strong>67%</strong>
-                    <span>Healthy</span>
+                    <strong class="health-value" id="fleet-health-percentage">—</strong>
+                    <span id="fleet-health-center-label">Loading</span>
                   </div>
                 </div>
               </div>
               <ul class="health-legend">
-                <li><span><i class="health-dot online"></i>Online</span><strong>16</strong></li>
-                <li><span><i class="health-dot warning"></i>Warning</span><strong>3</strong></li>
-                <li><span><i class="health-dot offline"></i>Offline</span><strong>2</strong></li>
-                <li><span><i class="health-dot updating"></i>Updating</span><strong>3</strong></li>
+                <li data-health-state="online"><span><i class="health-dot healthy"></i>Healthy</span><strong class="health-value" data-health-count>—</strong></li>
+                <li data-health-state="warning"><span><i class="health-dot warning"></i>Warning</span><strong class="health-value" data-health-count>—</strong></li>
+                <li data-health-state="offline"><span><i class="health-dot offline"></i>Offline</span><strong class="health-value" data-health-count>—</strong></li>
+                <li data-health-state="updating"><span><i class="health-dot updating"></i>Updating</span><strong class="health-value" data-health-count>—</strong></li>
               </ul>
             </div>
           </article>
@@ -333,6 +366,6 @@
         </main>
       </div>
     </div>
-    <script type="module" src="scripts/overview.js"></script>
+    <script type="module" src="scripts/overview.js?v=20260926-remote-simulator"></script>
   </body>
 </html>

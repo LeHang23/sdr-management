@@ -23,6 +23,8 @@ points for device investigation and remote reconfiguration.
 - Overview is the active navigation destination.
 - Demo data is provided by the SDR Simulator until physical devices are
   integrated.
+- A remote simulator shall use the authenticated Device Gateway contract rather
+  than writing directly to the application database.
 
 ## 4. Screen requirements
 
@@ -30,7 +32,7 @@ points for device investigation and remote reconfiguration.
 | --- | --- | --- |
 | SRS-OVW-01 | The page shall display Total devices, Online now, Needs attention, and Active jobs summary metrics. | RS-01-FLEET-SUMMARY.md |
 | SRS-OVW-02 | The page shall display Throughput and SNR trends for a selected time range. | RS-02-SYSTEM-PERFORMANCE.md |
-| SRS-OVW-03 | The page shall display the device distribution for Online, Warning, Offline, and Updating states. | RS-03-FLEET-HEALTH.md |
+| SRS-OVW-03 | The page shall display the device health distribution for Healthy, Warning, Offline, and Updating states, distinct from the Online now connectivity metric. | RS-03-FLEET-HEALTH.md |
 | SRS-OVW-04 | The page shall display a prioritized list of devices requiring investigation and provide `View all` access to the complete filtered list when Device Management is available. | RS-04-DEVICES-TO-WATCH.md |
 | SRS-OVW-05 | The page shall display recent alerts from newest to oldest and provide an `All` action for access to the complete Alert inbox when available. | RS-05-RECENT-ALERTS.md |
 | SRS-OVW-06 | The page shall provide a primary action for starting a reconfiguration workflow. | RS-06-NEW-RECONFIGURATION.md |
@@ -50,6 +52,12 @@ points for device investigation and remote reconfiguration.
 
 - Current device state should be reflected within five seconds of ingestion
   while the platform is connected.
+- A simulator heartbeat shall identify its data as simulated, and an expired
+  heartbeat shall cause the corresponding remote simulated device to become
+  Offline.
+- The default simulator heartbeat interval shall be 60 seconds. The default
+  stale-device timeout shall be 180 seconds so a device is not marked Offline
+  until it misses three expected heartbeats.
 - Changing a chart time range shall not reload the entire page.
 - Selecting a device, alert, `View all`, `All`, or primary action shall open the
   corresponding target screen or workflow when available.

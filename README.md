@@ -15,6 +15,7 @@ sdr-management/
 |-- design/                    Figma links only
 |-- frontend/                  Static HTML/CSS interface prototype
 |-- backend/                   Node.js API and local SQLite data model
+|-- references/                Exported project diagram images
 `-- docs/
     |-- requirements/
     |   |-- FBS.md             English feature breakdown
@@ -79,6 +80,18 @@ powershell -ExecutionPolicy Bypass -File ai-skills/sdr-frontend/scripts/validate
 The first designed frame combines the Admin Dashboard shell with the Overview
 page. Their requirements are tracked in separate screen folders. See
 [`design/DESIGN-LINKS.md`](design/DESIGN-LINKS.md) for the Figma reference.
+
+## Diagram references
+
+The `references/` directory stores exported images of project diagrams for
+documentation, issues, pull requests, and presentations.
+
+- [System architecture](references/system-architecture.png): current simulator,
+  gateway, backend, database, and Admin Dashboard architecture.
+- [Heartbeat data flow](references/heartbeat-data-flow.png): heartbeat lifecycle
+  from telemetry generation to the Admin Dashboard.
+
+Use lowercase kebab-case file names for additional diagram images.
 
 ## Local application preview
 

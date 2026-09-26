@@ -8,7 +8,12 @@ work, or design-fidelity review.
 ```text
 frontend/
 |-- index.html      Admin Dashboard shell with Overview active
-`-- styles.css      Shared visual tokens and page styles
+|-- styles.css      Shared visual tokens and page styles
+`-- scripts/
+    |-- overview.js             Page initialization and shared snapshot lifecycle
+    |-- fleet-summary.js        Fleet Summary rendering and section interactions
+    |-- fleet-health.js         Fleet Health rendering and section interactions
+    `-- system-performance.js   System Performance chart and range controls
 ```
 
 Preserve this structure for small static changes. If another screen requires a
@@ -16,6 +21,28 @@ new HTML page, use a descriptive lowercase kebab-case filename and reuse the
 shared stylesheet. Do not reorganize the entire frontend merely to add one
 screen. Introduce shared asset or script folders only when actual files require
 them.
+
+### Section module ownership for every page
+
+Keep each page section's DOM references, rendering, empty/error/stale states,
+and local controls in its own module. The page entrypoint imports these modules
+and supplies shared data. Section rendering must not accumulate in the page
+entrypoint, and sections must not call each other's render functions.
+
+Fetch each shared data source once per refresh and pass the same snapshot and
+freshness state to its consumers. Shared validation and cache handling may
+remain in the page coordinator or a shared data module. Extract reusable helpers
+into shared modules rather than copying them between sections.
+
+Use descriptive lowercase kebab-case names for each page and section. The tree
+above documents existing files only; it is not a required list for other pages.
+When implementing a new section's behavior, create its module and wire it through
+the page coordinator. Static sections without JavaScript need no empty module.
+
+Review module ownership as well as visual behavior. The frontend validator checks
+local module imports across frontend JavaScript files. Also review that page
+entrypoints own orchestration and each section owns its DOM and rendering;
+import checks alone cannot prove that responsibility boundaries are correct.
 
 ## 2. Product and interface language
 
@@ -25,7 +52,9 @@ them.
 - UI language: English.
 - The shared header does not display a global `Live`, `Online`, or `Offline`
   connectivity badge.
-- Device health states: `Online`, `Warning`, `Offline`, and `Updating`.
+- Device health labels: `Healthy`, `Warning`, `Offline`, and `Updating`.
+  `Healthy` maps to the backend `health_status = online` value and must remain
+  visually distinct from the `Online now` connectivity metric.
 - Job states and action labels must match the screen requirements exactly.
 
 ## 3. Visual foundation

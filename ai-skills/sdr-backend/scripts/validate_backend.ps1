@@ -7,10 +7,12 @@ try {
     'package.json',
     'backend/database/schema.sql',
     'backend/src/database.js',
+    'backend/src/gateway-ingestion.js',
     'backend/src/overview-summary.js',
     'backend/src/system-performance.js',
     'backend/src/server.js',
     'backend/test/overview-summary.test.js',
+    'backend/test/gateway-ingestion.test.js',
     'backend/test/system-performance.test.js'
   )
 
@@ -21,6 +23,8 @@ try {
   }
 
   node --check backend/src/server.js
+  node --check backend/src/gateway-ingestion.js
+  node --check backend/simulator/device-simulator.js
   node --check backend/src/overview-summary.js
   node --check backend/src/system-performance.js
   npm.cmd run test
