@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { timingSafeEqual } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, extname, resolve, sep } from 'node:path';
@@ -6,6 +7,11 @@ import { fileURLToPath } from 'node:url';
 import { openDatabase, migrateDatabase, seedDatabase } from './database.js';
 import { getOverviewSummary } from './overview-summary.js';
 import { getSystemPerformance, PERFORMANCE_RANGES } from './system-performance.js';
+import {
+  GatewayIngestionError,
+  expireStaleGatewayDevices,
+  ingestGatewayHeartbeat,
+} from './gateway-ingestion.js';
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const rootDirectory = resolve(currentDirectory, '../..');
@@ -13,6 +19,8 @@ const frontendDirectory = resolve(rootDirectory, 'frontend');
 const databasePath = process.env.SDR_DATABASE_PATH ?? resolve(rootDirectory, 'backend/data/sdr-management.db');
 const host = process.env.HOST ?? '127.0.0.1';
 const port = Number(process.env.PORT ?? 4173);
+const gatewayToken = process.env.SDR_GATEWAY_TOKEN;
+const heartbeatTimeoutMs = Number(process.env.SDR_HEARTBEAT_TIMEOUT_MS ?? 180_000);
 const database = openDatabase(databasePath);
 migrateDatabase(database);
 if (process.env.SDR_SEED_DEMO === 'true') {
@@ -34,6 +42,47 @@ function sendJson(response, statusCode, value, headers = {}) {
     ...headers,
   });
   response.end(JSON.stringify(value));
+}
+
+function tokensMatch(provided, expected) {
+  const providedBuffer = Buffer.from(provided);
+  const expectedBuffer = Buffer.from(expected);
+  return providedBuffer.length === expectedBuffer.length && timingSafeEqual(providedBuffer, expectedBuffer);
+}
+
+function authorizeGateway(request, response) {
+  if (!gatewayToken) {
+    sendJson(response, 503, { error: 'SDR Gateway ingestion is disabled' });
+    return false;
+  }
+  const authorization = request.headers.authorization ?? '';
+  const providedToken = authorization.startsWith('Bearer ') ? authorization.slice(7) : '';
+  if (!providedToken || !tokensMatch(providedToken, gatewayToken)) {
+    sendJson(response, 401, { error: 'Invalid gateway credentials' }, { 'WWW-Authenticate': 'Bearer' });
+    return false;
+  }
+  return true;
+}
+
+async function readJson(request) {
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of request) {
+    size += chunk.length;
+    if (size > 64 * 1024) {
+      const error = new Error('Request body exceeds 64 KiB');
+      error.statusCode = 413;
+      throw error;
+    }
+    chunks.push(chunk);
+  }
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  } catch {
+    const error = new Error('Request body must contain valid JSON');
+    error.statusCode = 400;
+    throw error;
+  }
 }
 
 async function serveStatic(pathname, response) {
@@ -59,6 +108,24 @@ const server = createServer(async (request, response) => {
   const url = new URL(request.url, `http://${request.headers.host ?? `${host}:${port}`}`);
   if (request.method === 'GET' && url.pathname === '/health') {
     sendJson(response, 200, { status: 'ok' });
+    return;
+  }
+  const heartbeatMatch = url.pathname.match(/^\/api\/v1\/gateway\/devices\/([^/]+)\/heartbeat$/);
+  if (request.method === 'POST' && heartbeatMatch) {
+    if (!authorizeGateway(request, response)) return;
+    try {
+      const deviceId = decodeURIComponent(heartbeatMatch[1]);
+      const payload = await readJson(request);
+      const accepted = ingestGatewayHeartbeat(database, deviceId, payload);
+      sendJson(response, 202, accepted);
+    } catch (error) {
+      if (error instanceof GatewayIngestionError || error.statusCode) {
+        sendJson(response, error.statusCode ?? 400, { error: error.message });
+        return;
+      }
+      console.error('Could not ingest gateway heartbeat', error);
+      sendJson(response, 500, { error: 'Gateway heartbeat unavailable' });
+    }
     return;
   }
   if (request.method === 'GET' && url.pathname === '/api/v1/overview/summary') {
@@ -118,7 +185,19 @@ server.listen(port, host, () => {
   console.log(`SQLite database: ${databasePath}`);
 });
 
+const expirationTimer = gatewayToken && Number.isFinite(heartbeatTimeoutMs) && heartbeatTimeoutMs > 0
+  ? setInterval(() => {
+      try {
+        expireStaleGatewayDevices(database, new Date(Date.now() - heartbeatTimeoutMs).toISOString());
+      } catch (error) {
+        console.error('Could not expire stale gateway devices', error);
+      }
+    }, Math.max(1_000, Math.min(heartbeatTimeoutMs, 5_000)))
+  : null;
+expirationTimer?.unref();
+
 function closeServer() {
+  if (expirationTimer) clearInterval(expirationTimer);
   server.close(() => {
     database.close();
     process.exit(0);

@@ -56,9 +56,11 @@ export function getOverviewSummary(database) {
     const revision = database.prepare("SELECT value, updated_at FROM overview_metadata WHERE key = 'revision'").get();
     const source = database.prepare(`
       SELECT CASE
-        WHEN EXISTS (SELECT 1 FROM devices WHERE source = 'sdr_gateway')
+        WHEN EXISTS (SELECT 1 FROM devices WHERE source = 'sdr_gateway' AND id NOT LIKE 'SIM-SDR-%')
           OR EXISTS (SELECT 1 FROM reconfiguration_jobs WHERE source = 'sdr_gateway')
         THEN 'sdr_gateway'
+        WHEN EXISTS (SELECT 1 FROM devices WHERE source = 'sdr_gateway' AND id LIKE 'SIM-SDR-%')
+        THEN 'simulator'
         ELSE 'manual'
       END AS mode
     `).get().mode;
@@ -68,7 +70,9 @@ export function getOverviewSummary(database) {
       generatedAt: revision.updated_at,
       source: {
         mode: source,
-        label: source === 'sdr_gateway' ? 'SDR Gateway' : 'Manual database input',
+        label: source === 'sdr_gateway'
+          ? 'SDR Gateway'
+          : source === 'simulator' ? 'Remote device simulator' : 'Manual database input',
       },
       metrics: { totalDevices, onlineNow, needsAttention, activeJobs },
       details: {
