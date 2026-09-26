@@ -15,7 +15,9 @@ function average(total, count) {
 function sourceDetails(mode) {
   return {
     mode,
-    label: mode === 'sdr_gateway' ? 'SDR Gateway' : 'Manual database input',
+    label: mode === 'sdr_gateway'
+      ? 'SDR Gateway'
+      : mode === 'simulator' ? 'Remote device simulator' : 'Manual database input',
   };
 }
 
@@ -57,6 +59,7 @@ export function getSystemPerformance(database, rangeKey) {
     }));
 
     let hasGatewayData = false;
+    let hasPhysicalGatewayData = false;
     for (const row of rows) {
       const sampledTime = Date.parse(row.sampled_at);
       const index = Math.min(
@@ -65,7 +68,10 @@ export function getSystemPerformance(database, rangeKey) {
       );
       const bucket = buckets[index];
       bucket.devices.add(row.device_id);
-      if (row.source === 'sdr_gateway') hasGatewayData = true;
+      if (row.source === 'sdr_gateway') {
+        hasGatewayData = true;
+        if (!row.device_id.startsWith('SIM-SDR-')) hasPhysicalGatewayData = true;
+      }
       if (Number.isFinite(row.throughput_mbps)) {
         bucket.throughputTotal += row.throughput_mbps;
         bucket.throughputCount += 1;
@@ -92,7 +98,7 @@ export function getSystemPerformance(database, rangeKey) {
     return {
       snapshotId: `performance-${revision.value}-${rangeKey}`,
       generatedAt: latest.sampled_at,
-      source: sourceDetails(hasGatewayData ? 'sdr_gateway' : 'manual'),
+      source: sourceDetails(hasPhysicalGatewayData ? 'sdr_gateway' : hasGatewayData ? 'simulator' : 'manual'),
       range: { key: rangeKey, ...range },
       summary: {
         averageOnlineDevices,
