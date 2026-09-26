@@ -194,7 +194,8 @@ a {
   place-items: center;
   flex: 0 0 18px;
   width: 18px;
-  height: 22px;
+  height: 18px;
+  line-height: 0;
 }
 
 .nav-icon > img {
@@ -202,22 +203,28 @@ a {
   width: auto;
   max-width: 18px;
   height: auto;
-  max-height: 22px;
+  max-height: 18px;
 }
 
 .nav-icon-composite > img {
   position: absolute;
 }
 
+.nav-icon-composite > img:first-child {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .nav-icon-composite .reconfiguration-detail {
-  bottom: 2px;
+  bottom: 0;
   left: 0;
   width: 6px;
   height: 6px;
 }
 
 .nav-icon-alerts .alerts-detail {
-  top: 10px;
+  top: 9px;
   left: 8px;
   width: 2px;
   height: 4px;
@@ -324,11 +331,22 @@ a {
 }
 
 .search-glyph {
-  display: block;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
   color: #45647b;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1;
+  line-height: 0;
+}
+
+.search-glyph svg {
+  display: block;
+  width: 15px;
+  height: 15px;
+  stroke: currentcolor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
 }
 
 .profile-button {
@@ -424,6 +442,25 @@ h1 {
   transition: transform 150ms ease, box-shadow 150ms ease;
 }
 
+.primary-button-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 0;
+}
+
+.primary-button-icon svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  stroke: currentcolor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
 .primary-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 22px rgb(37 99 235 / 0.24);
@@ -469,12 +506,25 @@ select:focus-visible,
 }
 
 .metric-icon {
-  display: grid;
+  display: inline-grid;
   place-items: center;
+  flex: 0 0 22px;
   width: 22px;
   height: 22px;
-  font-size: 17px;
+  line-height: 0;
   border-radius: 6px;
+}
+
+.metric-icon svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  overflow: visible;
+  stroke: currentcolor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 
 .metric-icon.blue { color: var(--blue-600); background: #eff5ff; }
@@ -841,19 +891,24 @@ select:focus-visible,
 }
 
 .donut-chart {
+  --health-healthy-end: 0deg;
+  --health-warning-end: 0deg;
+  --health-offline-end: 0deg;
+
+  position: relative;
   display: grid;
   place-items: center;
   width: 150px;
   height: 150px;
   background: conic-gradient(
-    var(--green-600) 0deg 284deg,
-    #e9eef4 284deg 302deg,
-    var(--amber-500) 302deg 326deg,
-    #f3d9df 326deg 342deg,
-    var(--blue-600) 342deg 360deg
+    var(--green-600) 0deg var(--health-healthy-end),
+    var(--amber-500) var(--health-healthy-end) var(--health-warning-end),
+    var(--red-500) var(--health-warning-end) var(--health-offline-end),
+    var(--blue-600) var(--health-offline-end) 360deg
   );
   border-radius: 50%;
   transform: rotate(-35deg);
+  transition: background 180ms ease;
 }
 
 .donut-chart::before {
@@ -917,7 +972,39 @@ select:focus-visible,
   font-size: 11px;
 }
 
-.health-dot.online { background: var(--green-500); }
+.health-card.is-empty .donut-chart,
+.health-card.is-unavailable .donut-chart,
+.health-card.is-loading .donut-chart {
+  background: var(--slate-100);
+}
+
+.health-card.is-loading .health-value {
+  min-width: 22px;
+  color: transparent;
+  background: linear-gradient(90deg, var(--slate-100) 25%, var(--slate-200) 50%, var(--slate-100) 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: health-loading 1.1s linear infinite;
+}
+
+.health-card.is-loading .donut-center .health-value {
+  min-width: 52px;
+}
+
+.health-card.is-stale .card-header p {
+  color: #986c00;
+}
+
+.health-card.is-unavailable .donut-center strong,
+.health-card.is-unavailable .health-legend strong {
+  color: var(--slate-400);
+}
+
+@keyframes health-loading {
+  to { background-position: -200% 0; }
+}
+
+.health-dot.healthy { background: var(--green-500); }
 .health-dot.warning { background: var(--amber-500); }
 .health-dot.offline { background: var(--red-500); }
 .health-dot.updating { background: var(--blue-600); }

@@ -26,6 +26,15 @@ static frontend conventions.
   user authorizes or asks for that change.
 - Current data is from the SDR Simulator, not physical hardware. Simulated data
   must be recognizable in the UI.
+- Every frontend page follows the same module ownership rules. Each implemented
+  section with JavaScript behavior owns a separate module. Page entrypoints coordinate initialization,
+  shared snapshot fetching, caching, and refresh scheduling; section rendering
+  and section-specific interactions belong in their own modules.
+- Sections sharing a data source receive the same snapshot and freshness state
+  from the coordinator, without duplicate requests or calling each other's renderers.
+- Name page and section modules after their actual responsibility using
+  lowercase kebab-case. Extract reusable logic into shared modules. These rules
+  apply to existing and future pages, with no fixed list of page or section names.
 
 ## Sources of truth
 
@@ -78,7 +87,7 @@ powershell -ExecutionPolicy Bypass -File ai-skills/sdr-frontend/scripts/validate
 ```
 
 Read [references/frontend-standards.md](references/frontend-standards.md) when
-creating a new screen, changing shared visual tokens, adding responsive behavior,
+creating a new screen, changing section modules, changing shared visual tokens, adding responsive behavior,
 or reviewing design fidelity.
 
 ## Handoff criteria

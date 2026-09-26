@@ -75,7 +75,7 @@ SDR Management
 | FBS-1.1 | Overview | Page overview | Fleet condition, performance, devices requiring attention, recent alerts, and reconfiguration entry | Designed |
 | FBS-1.1.1 | Overview | Fleet summary | Total devices, online devices, devices needing attention, active jobs | Designed |
 | FBS-1.1.2 | Overview | System performance | Throughput and SNR trends, time-range control, chart legend | Designed |
-| FBS-1.1.3 | Overview | Fleet health | Online, Warning, Offline, and Updating distribution | Designed |
+| FBS-1.1.3 | Overview | Fleet health | Healthy, Warning, Offline, and Updating health distribution | Designed |
 | FBS-1.1.4 | Overview | Devices to watch | Prioritized device list, state, issue summary, last seen, detail action, and `View all` navigation to the filtered Device Management list | Designed |
 | FBS-1.1.5 | Overview | Recent alerts | Severity, alert summary, source, time, navigation to alert detail, and `All` access to the complete Alert inbox | Designed |
 | FBS-1.1.6 | Overview | Reconfiguration action | New reconfiguration call to action | Designed |
@@ -106,7 +106,8 @@ SDR Management
 | FBS-2.1 | Login | Authentication | Sign in, session errors, password recovery | Deferred |
 | FBS-2.2 | Users | User management | Invite, edit, activate, deactivate, role assignment | Deferred |
 | FBS-2.3 | Roles | Authorization | Roles, permissions, protected action mapping | Deferred |
-| FBS-3.1 | Simulator | Scenario control | Device generation, telemetry patterns, state changes, job outcomes | Planned |
+| FBS-3.1 | Simulator | Remote device simulation | Device generation, heartbeat and telemetry scenarios; command and job outcomes remain planned | Partially implemented |
+| FBS-3.2 | Device Gateway | Authenticated ingestion | Device heartbeat and telemetry ingestion, source identification, and stale-device timeout | Implemented |
 | FBS-3.4 | System settings | Platform configuration | Thresholds, retention, notification rules, environments | Planned |
 
 ## 4. Current Admin Dashboard shell and Overview UI groups
@@ -120,7 +121,7 @@ its active page. The groups remain separate for requirement traceability.
 | Admin Dashboard / Shared header | Use platform-wide controls | Breadcrumb, search, notifications, profile | SRS-DASH-03 through SRS-DASH-05 |
 | Overview / KPI cards | Assess fleet condition quickly | Total devices, online now, needs attention, active jobs | SRS-OVW-01 |
 | Overview / System Performance | Observe operational trends | Throughput and SNR chart with time range | SRS-OVW-02 |
-| Overview / Fleet Health | Understand device-state distribution | Online, Warning, Offline, Updating | SRS-OVW-03 |
+| Overview / Fleet Health | Understand device-health distribution | Healthy, Warning, Offline, Updating | SRS-OVW-03 |
 | Overview / Devices to Watch | Prioritize investigation | Device state, issue, last seen, detail link, filtered `View all` | SRS-OVW-04 |
 | Overview / Recent Alerts | Review latest incidents and access the complete inbox | Severity, summary, source, time, alert detail, `All` | SRS-OVW-05 |
 | Overview / New Reconfiguration | Begin a remote change | Primary action opening the job workflow | SRS-OVW-06 |

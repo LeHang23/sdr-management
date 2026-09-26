@@ -22,6 +22,8 @@ công việc đang chạy và sự cố gần đây. Trang cũng cung cấp các
 - Admin Dashboard shell đã tải thành công.
 - Overview là navigation destination đang active.
 - SDR Simulator cung cấp dữ liệu demo cho đến khi tích hợp thiết bị vật lý.
+- Remote simulator phải sử dụng contract Device Gateway có xác thực thay vì ghi
+  trực tiếp vào database của ứng dụng.
 
 ## 4. Yêu cầu màn hình
 
@@ -29,7 +31,7 @@ công việc đang chạy và sự cố gần đây. Trang cũng cung cấp các
 | --- | --- | --- |
 | SRS-OVW-01 | Trang phải hiển thị Total devices, Online now, Needs attention và Active jobs. | RS-01-FLEET-SUMMARY.md |
 | SRS-OVW-02 | Trang phải hiển thị xu hướng Throughput và SNR theo khoảng thời gian đã chọn. | RS-02-SYSTEM-PERFORMANCE.md |
-| SRS-OVW-03 | Trang phải hiển thị phân bố thiết bị theo Online, Warning, Offline và Updating. | RS-03-FLEET-HEALTH.md |
+| SRS-OVW-03 | Trang phải hiển thị phân bố sức khỏe thiết bị theo Healthy, Warning, Offline và Updating, phân biệt với metric kết nối Online now. | RS-03-FLEET-HEALTH.md |
 | SRS-OVW-04 | Trang phải hiển thị danh sách ưu tiên các thiết bị cần điều tra và cung cấp `View all` để mở danh sách đã lọc đầy đủ khi Device Management khả dụng. | RS-04-DEVICES-TO-WATCH.md |
 | SRS-OVW-05 | Trang phải hiển thị cảnh báo gần đây theo thứ tự mới nhất trước và cung cấp action `All` để truy cập Alert inbox đầy đủ khi khả dụng. | RS-05-RECENT-ALERTS.md |
 | SRS-OVW-06 | Trang phải có primary action để bắt đầu quy trình reconfiguration. | RS-06-NEW-RECONFIGURATION.md |
@@ -49,6 +51,11 @@ công việc đang chạy và sự cố gần đây. Trang cũng cung cấp các
 
 - Trạng thái thiết bị phải được phản ánh trong vòng năm giây sau khi hệ thống
   nhận dữ liệu khi nền tảng đang kết nối.
+- Heartbeat từ simulator phải nhận diện dữ liệu là dữ liệu mô phỏng; khi
+  heartbeat hết hạn, thiết bị mô phỏng từ xa tương ứng phải chuyển sang Offline.
+- Chu kỳ heartbeat mặc định của simulator phải là 60 giây. Timeout thiết bị
+  stale mặc định phải là 180 giây để thiết bị chỉ chuyển Offline sau khi bỏ lỡ
+  ba heartbeat dự kiến.
 - Đổi khoảng thời gian biểu đồ không được tải lại toàn bộ trang.
 - Chọn thiết bị, cảnh báo, `View all`, `All` hoặc primary action phải mở đúng màn hình
   hoặc workflow tương ứng khi khả dụng.

@@ -32,7 +32,8 @@ place HTML, SVG exports, image exports, or implementation code in `design/`.
   global connectivity badge.
 - KPI row shows Total devices, Online now, Needs attention, and Active jobs.
 - Main chart compares Throughput (Mbps) and SNR (dB).
-- Fleet health distinguishes Online, Warning, Offline, and Updating.
+- Fleet health distinguishes Healthy, Warning, Offline, and Updating; Healthy
+  is separate from the Online now connectivity metric.
 - Lower panels show Devices to watch and Recent alerts.
 - Primary action is **New reconfiguration**.
 - Treat sidebar and shared header as Admin Dashboard shell content; treat KPI,

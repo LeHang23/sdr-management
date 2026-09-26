@@ -73,7 +73,8 @@ if (-not (Test-Path -LiteralPath $frontendRoot -PathType Container)) {
             if ($href -match '^(?:https?:)?//') {
                 continue
             }
-            $resolvedStylesheet = Join-Path $file.DirectoryName $href
+            $hrefPath = ($href -split '[?#]', 2)[0]
+            $resolvedStylesheet = Join-Path $file.DirectoryName $hrefPath
             if (-not (Test-Path -LiteralPath $resolvedStylesheet -PathType Leaf)) {
                 Add-ValidationError "Broken stylesheet reference in $($file.FullName): $href"
             }
@@ -96,6 +97,23 @@ if (-not (Test-Path -LiteralPath $frontendRoot -PathType Container)) {
         $content = Get-Content -Raw -Encoding utf8 -LiteralPath $file.FullName
         if ($content -notmatch ':root\s*\{') {
             Add-ValidationError "CSS file does not define shared root tokens: $($file.FullName)"
+        }
+    }
+}
+
+if (Test-Path -LiteralPath $frontendRoot -PathType Container) {
+    $scriptFiles = @(Get-ChildItem -LiteralPath $frontendRoot -Recurse -File |
+        Where-Object { $_.Extension -in @('.js', '.mjs') })
+    foreach ($scriptFile in $scriptFiles) {
+        $scriptContent = Get-Content -Raw -Encoding utf8 -LiteralPath $scriptFile.FullName
+        $imports = [regex]::Matches($scriptContent,
+            '(?:\bfrom\s*|\bimport\s*(?:\(\s*)?)["''](\.{1,2}/[^"'']+)["'']')
+        foreach ($import in $imports) {
+            $modulePath = ($import.Groups[1].Value -split '[?#]', 2)[0]
+            $resolvedModule = Join-Path $scriptFile.DirectoryName $modulePath
+            if (-not (Test-Path -LiteralPath $resolvedModule -PathType Leaf)) {
+                Add-ValidationError "Broken local module import in $($scriptFile.FullName): $modulePath"
+            }
         }
     }
 }

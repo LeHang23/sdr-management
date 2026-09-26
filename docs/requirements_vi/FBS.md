@@ -75,7 +75,7 @@ SDR Management
 | FBS-1.1 | Overview | Tổng quan trang | Tình trạng fleet, hiệu năng, thiết bị cần chú ý, cảnh báo gần đây và điểm vào reconfiguration | Đã thiết kế |
 | FBS-1.1.1 | Overview | Fleet summary | Tổng thiết bị, thiết bị online, thiết bị cần chú ý, active jobs | Đã thiết kế |
 | FBS-1.1.2 | Overview | System performance | Xu hướng Throughput và SNR, chọn khoảng thời gian, chú thích biểu đồ | Đã thiết kế |
-| FBS-1.1.3 | Overview | Fleet health | Phân bố Online, Warning, Offline và Updating | Đã thiết kế |
+| FBS-1.1.3 | Overview | Fleet health | Phân bố sức khỏe Healthy, Warning, Offline và Updating | Đã thiết kế |
 | FBS-1.1.4 | Overview | Devices to watch | Danh sách ưu tiên, trạng thái, vấn đề, last seen, mở chi tiết và `View all` đến danh sách Device Management đã lọc | Đã thiết kế |
 | FBS-1.1.5 | Overview | Recent alerts | Severity, nội dung, nguồn, thời gian, mở chi tiết cảnh báo và `All` để truy cập Alert inbox đầy đủ | Đã thiết kế |
 | FBS-1.1.6 | Overview | Reconfiguration action | Nút bắt đầu New reconfiguration | Đã thiết kế |
@@ -106,7 +106,8 @@ SDR Management
 | FBS-2.1 | Login | Authentication | Sign in, session errors, password recovery | Hoãn lại |
 | FBS-2.2 | Users | Quản lý người dùng | Invite, edit, activate, deactivate, role assignment | Hoãn lại |
 | FBS-2.3 | Roles | Authorization | Roles, permissions, protected action mapping | Hoãn lại |
-| FBS-3.1 | Simulator | Điều khiển scenario | Sinh thiết bị, telemetry pattern, thay đổi trạng thái, kết quả job | Dự kiến |
+| FBS-3.1 | Simulator | Giả lập thiết bị từ xa | Sinh thiết bị, heartbeat và telemetry scenario; command và kết quả job vẫn dự kiến | Đã triển khai một phần |
+| FBS-3.2 | Device Gateway | Nhận dữ liệu có xác thực | Nhận heartbeat và telemetry, nhận diện nguồn và timeout thiết bị stale | Đã triển khai |
 | FBS-3.4 | System settings | Cấu hình nền tảng | Thresholds, retention, notification rules, environments | Dự kiến |
 
 ## 4. Các nhóm UI của Admin Dashboard shell và Overview hiện tại
@@ -120,7 +121,7 @@ page. Hai phần được tách riêng để requirement trace chính xác.
 | Admin Dashboard / Shared header | Dùng control toàn nền tảng | Breadcrumb, search, notifications, profile | SRS-DASH-03 đến SRS-DASH-05 |
 | Overview / KPI cards | Đánh giá nhanh đội thiết bị | Tổng thiết bị, online now, needs attention, active jobs | SRS-OVW-01 |
 | Overview / System Performance | Theo dõi xu hướng vận hành | Biểu đồ Throughput và SNR theo khoảng thời gian | SRS-OVW-02 |
-| Overview / Fleet Health | Hiểu phân bố trạng thái thiết bị | Online, Warning, Offline, Updating | SRS-OVW-03 |
+| Overview / Fleet Health | Hiểu phân bố sức khỏe thiết bị | Healthy, Warning, Offline, Updating | SRS-OVW-03 |
 | Overview / Devices to Watch | Ưu tiên điều tra | Trạng thái, vấn đề, last seen, link chi tiết, `View all` đã lọc | SRS-OVW-04 |
 | Overview / Recent Alerts | Xem sự cố mới nhất và truy cập inbox đầy đủ | Severity, nội dung, nguồn, thời gian, chi tiết cảnh báo, `All` | SRS-OVW-05 |
 | Overview / New Reconfiguration | Bắt đầu thay đổi từ xa | Mở quy trình tạo reconfiguration job | SRS-OVW-06 |
