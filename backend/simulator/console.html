@@ -123,6 +123,7 @@
       <div class="process-node"><strong>Admin backend</strong><span id="server-url">Loading target…</span></div>
     </section>
 
+    <p class="legend" id="schedule-status" aria-live="polite">Loading heartbeat schedule…</p>
     <div class="section-head">
       <h2>Virtual devices</h2>
       <span class="legend">Change a mode, wait one heartbeat interval, then compare the Admin Dashboard.</span>
@@ -168,8 +169,9 @@
     }
 
     function connectionLabel(device) {
-      if (device.mode === 'disconnected' || device.missedHeartbeats >= 3) return 'offline';
-      if (device.transportStatus === 'failed') return 'failed';
+      if (device.mode === 'disconnected' || device.transportStatus === 'skipped') return 'not sending';
+      if (device.transportStatus === 'failed') return 'transport error';
+      if (device.transportStatus === 'cancelled') return 'cancelled';
       return device.intendedHealthStatus ?? 'waiting';
     }
 
@@ -201,7 +203,7 @@
               <span data-field="dot" class="dot ${escapeHtml(device.transportStatus)}" aria-hidden="true"></span>
               <h3>${escapeHtml(device.id)}</h3>
             </div>
-            <span data-field="status" class="status ${escapeHtml(status)}">${escapeHtml(status)}</span>
+            <span data-field="status" class="status ${device.transportStatus === 'failed' ? 'failed' : escapeHtml(device.intendedHealthStatus ?? '')}">${escapeHtml(status)}</span>
           </div>
           <div class="mode-row">
             <label for="mode-${escapeHtml(device.id)}">Simulation mode</label>
@@ -236,7 +238,7 @@
       const field = (name) => card.querySelector(`[data-field="${name}"]`);
       const status = connectionLabel(device);
       field('dot').className = `dot ${device.transportStatus}`;
-      field('status').className = `status ${status}`;
+      field('status').className = `status ${device.transportStatus === 'failed' ? 'failed' : device.intendedHealthStatus ?? ''}`;
       field('status').textContent = status;
       field('throughput').textContent = telemetryValue(device, 'throughputMbps', 'Mbps');
       field('snr').textContent = telemetryValue(device, 'snrDb', 'dB');
@@ -272,7 +274,8 @@
       elements.tick.textContent = status.tick;
       elements.accepted.textContent = status.totals.accepted;
       elements.problem.textContent = `${status.totals.skipped} / ${status.totals.failed}`;
-      elements.controlUrl.textContent = `${status.controlUrl} • interval ${status.intervalMs / 1000}s`;
+      elements.controlUrl.textContent = `${status.controlUrl} • interval ${status.intervalMs / 1000}s • request timeout ${status.requestTimeoutMs / 1000}s`;
+      document.querySelector('#schedule-status').textContent = `${!status.running ? 'Paused' : status.sending ? 'Sending heartbeat batch' : `Next batch: ${formatTime(status.nextTickAt)} (in ${Math.max(0, Math.ceil((Date.parse(status.nextTickAt) - Date.now()) / 1000))}s)`}. For three missed heartbeats, configure the backend Offline timeout to ${status.recommendedHeartbeatTimeoutMs / 1000}s. Backend Offline status is not read by this console.`;
       elements.serverUrl.textContent = status.serverUrl;
       elements.adminLink.href = `${status.serverUrl}/#overview`;
       elements.runControl.textContent = status.running ? 'Pause simulator' : 'Resume simulator';

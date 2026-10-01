@@ -53,6 +53,22 @@ must write into the same durable model and preserve API contracts.
   entry easier. Until access control is implemented, manual input is through
   the local database or controlled scripts.
 
+## Simulator reliability
+
+- Keep CLI configuration in `backend/simulator/simulator-config.js` and isolate
+  instance state in `simulator-runtime.js`; imports must not start a process.
+- Bound heartbeat requests through response-body consumption. Continuous mode
+  recovers on its next batch; one-shot mode exits nonzero on any failed send.
+- Validate integer settings at startup, without silently clamping device count.
+- Preserve start-to-start cadence, skip elapsed slots and prevent overlapping batches.
+- Pause/reset/mode changes cancel obsolete attempts; late results must not mutate
+  the current generation. Cancellation cannot undo backend ingestion.
+- Console transport failure or skipped sends do not establish backend Offline.
+- Keep backend Offline timeout explicit and document three times the simulator
+  interval plus sweep latency. Do not silently change server policy from clients.
+- Cover HTTP headers/body timeouts, exit codes, recovery and in-flight controls
+  in `backend/test/device-simulator.test.js`.
+
 ## Verification
 
 Run the relevant commands after changes:

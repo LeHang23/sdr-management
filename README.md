@@ -161,3 +161,11 @@ checks, and seeds demo records when its SQLite database is empty.
 The free service filesystem is ephemeral. It is suitable for reviewing the UI
 and API, but manual database changes may be lost after a restart or redeploy.
 Use persistent storage or a managed database before storing important data.
+
+## Simulator reliability
+
+The independent Simulator Console supports bounded heartbeat requests, explicit
+one-shot failure exit codes and safe pause/resume/reset controls. See
+[`backend/simulator/README.md`](backend/simulator/README.md) for configuration,
+interval/Offline policy and control semantics. Requirements are mirrored under
+`docs/requirements/SIMULATOR-CONSOLE/` and `docs/requirements_vi/SIMULATOR-CONSOLE/`.

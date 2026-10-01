@@ -21,6 +21,10 @@ const host = process.env.HOST ?? '127.0.0.1';
 const port = Number(process.env.PORT ?? 4173);
 const gatewayToken = process.env.SDR_GATEWAY_TOKEN;
 const heartbeatTimeoutMs = Number(process.env.SDR_HEARTBEAT_TIMEOUT_MS ?? 180_000);
+if (!Number.isInteger(heartbeatTimeoutMs) || heartbeatTimeoutMs < 1 || heartbeatTimeoutMs > 2_147_483_647) {
+  console.error('SDR_HEARTBEAT_TIMEOUT_MS must be an integer between 1 and 2147483647.');
+  process.exit(1);
+}
 const database = openDatabase(databasePath);
 migrateDatabase(database);
 if (process.env.SDR_SEED_DEMO === 'true') {
@@ -185,7 +189,7 @@ server.listen(port, host, () => {
   console.log(`SQLite database: ${databasePath}`);
 });
 
-const expirationTimer = gatewayToken && Number.isFinite(heartbeatTimeoutMs) && heartbeatTimeoutMs > 0
+const expirationTimer = gatewayToken
   ? setInterval(() => {
       try {
         expireStaleGatewayDevices(database, new Date(Date.now() - heartbeatTimeoutMs).toISOString());

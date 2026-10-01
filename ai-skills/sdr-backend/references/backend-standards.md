@@ -91,3 +91,8 @@ heartbeat with an optional telemetry sample. The endpoint is disabled unless
 `SDR_GATEWAY_TOKEN` is configured. Gateway clients never receive database
 access. `SDR_HEARTBEAT_TIMEOUT_MS` controls when an online gateway device is
 marked Offline after it stops reporting.
+
+Heartbeat timeout must be a positive integer. For a simulator fleet sharing one
+interval, configure the backend timeout to three times that interval; expiry
+is applied on the next sweep (up to five seconds later). The client does not
+change this server policy.
