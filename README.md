@@ -95,7 +95,8 @@ Use lowercase kebab-case file names for additional diagram images.
 
 ## Local application preview
 
-The Overview frontend now reads Fleet Summary and System Performance through
+The Overview frontend now reads Fleet Summary, Fleet Health, Devices to Watch,
+and System Performance through
 the Node.js API, so run
 the application server rather than a standalone static Python server:
 
@@ -105,11 +106,12 @@ npm.cmd start
 
 Then open [http://localhost:4173/](http://localhost:4173/). A static server can render the page but
 cannot serve `/api/v1/overview/summary` or `/api/v1/overview/performance`, so
-the KPI cards and performance chart will be unavailable.
+the KPI cards, health chart, watch list, and performance chart will be unavailable.
 
 ## Local backend and manual simulator data
 
-Fleet Summary and System Performance read from a Node.js API and a local SQLite database. No physical
+Fleet Summary, Fleet Health, Devices to Watch, and System Performance read from
+a Node.js API and a local SQLite database. No physical
 SDR is required: enter or edit simulator records directly in
 `backend/data/sdr-management.db` with a SQLite editor, or start with the
 tracked seed data. Use `backend/database/manual-entry.sql` as a safe copy/paste
@@ -136,6 +138,13 @@ The SQLite binary file is ignored by Git. The tables `devices`,
 also the future integration boundary for an SDR Gateway: real telemetry will
 update those rows with source `sdr_gateway`, and the existing Overview APIs will
 return the actual counts and performance trends without a frontend change.
+
+The Devices to Watch preview shows up to five devices from the same Summary
+snapshot as the KPI cards. Active critical issues rank first, Offline next,
+then Warning, with the latest issue/device update breaking ties. It shows the
+full needs-attention count, ignores resolved issues, and displays `Never seen`
+for missing last-seen timestamps. Device Detail and filtered `View all` remain
+planned. Recent Alerts still uses prototype data.
 
 ## Backend skill
 

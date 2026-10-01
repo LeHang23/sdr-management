@@ -13,6 +13,7 @@ frontend/
     |-- overview.js             Page initialization and shared snapshot lifecycle
     |-- fleet-summary.js        Fleet Summary rendering and section interactions
     |-- fleet-health.js         Fleet Health rendering and section interactions
+    |-- devices-to-watch.js     Devices to Watch rendering and snapshot validation
     `-- system-performance.js   System Performance chart and range controls
 ```
 
@@ -155,3 +156,12 @@ HTML/CSS prototypes must be honest about behavior:
 Stop after resolving issues relevant to the requested screen. Do not expand a
 static UI verification task into deployment, backend integration, or a frontend
 framework migration.
+
+## Devices to Watch
+
+Use `details.devicesToWatch` from the shared Overview Summary snapshot. The
+section renders identity, health, active issue summary, and last seen using text
+nodes. Keep loading/empty/error/stale/retry states within its module and retry
+through the page coordinator. Cache version v2 includes the watch-list contract;
+old snapshots without it must not produce a fabricated empty fleet. Keep Device
+Detail and filtered View all unavailable until their destination screens exist.
