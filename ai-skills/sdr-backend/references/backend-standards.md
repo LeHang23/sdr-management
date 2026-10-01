@@ -70,6 +70,17 @@ device count: Warning or Offline devices plus any device with an active critical
 issue, without double counting. A zero count is valid only when the relevant
 table/query is available and empty.
 
+The same Summary response includes `details.devicesToWatch` with `total`,
+`limit` (5), and `items`. Each item contains `deviceId`, `displayName`,
+`healthStatus`, `issueSummary`, nullable `issueSeverity`, nullable `lastSeenAt`,
+and `attentionAt`. The total equals `metrics.needsAttention`. Active critical
+issues rank first, Offline next, then Warning. Ties use selected issue update
+(or device update without an active issue) newest first, then device ID.
+Only the most severe/latest active issue is shown; resolved issues are ignored.
+Read the list inside the same transaction as the counts, never as a separate
+frontend fetch. Missing last seen remains null. State-based summaries describe
+Warning/Offline when no active issue exists.
+
 `GET /api/v1/overview/performance?range=6h` accepts `1h`, `6h`, or `24h` and
 returns 13 aggregate chart buckets. Each point contains `throughputMbps`,
 `snrDb`, and `onlineDevices`. Missing metric values remain `null`; they must not

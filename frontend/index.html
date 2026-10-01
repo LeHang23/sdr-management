@@ -8,7 +8,7 @@
       content="SDR Management administrator dashboard prototype"
     />
     <title>SDR Management — Operations overview</title>
-    <link rel="stylesheet" href="styles.css?v=20260926-health-label" />
+    <link rel="stylesheet" href="styles.css?v=20261001-devices-watch" />
   </head>
   <body>
     <div class="app-shell">
@@ -261,11 +261,11 @@
         </section>
 
         <section class="details-grid">
-          <article class="card devices-card" id="devices">
+          <article class="card devices-card is-loading" id="devices" aria-busy="true">
             <div class="card-header list-header">
               <div>
                 <h2>Devices to watch</h2>
-                <p>Sorted by priority</p>
+                <p id="devices-watch-count">Sorted by priority</p>
               </div>
               <span
                 class="planned-link"
@@ -279,40 +279,23 @@
             </div>
 
             <div class="table-scroll">
-              <table>
+              <table aria-label="Devices needing attention">
                 <thead>
                   <tr>
                     <th scope="col">Device</th>
                     <th scope="col">Status</th>
-                    <th scope="col">Firmware</th>
-                    <th scope="col">SNR</th>
-                    <th scope="col">Temperature</th>
+                    <th scope="col">Issue</th>
+                    <th scope="col">Last seen</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>SDR-HCM-04</strong><small>USRP B210 · Lab A</small></td>
-                    <td><span class="status-tag warning"><i></i>Warning</span></td>
-                    <td>v2.3.1</td>
-                    <td>11.8 dB</td>
-                    <td><strong class="hot-value">72°C</strong></td>
-                  </tr>
-                  <tr>
-                    <td><strong>SDR-DN-02</strong><small>LimeSDR · Station 2</small></td>
-                    <td><span class="status-tag offline"><i></i>Offline</span></td>
-                    <td>v2.2.8</td>
-                    <td>—</td>
-                    <td>—</td>
-                  </tr>
-                  <tr>
-                    <td><strong>SDR-HN-07</strong><small>PlutoSDR · Rooftop</small></td>
-                    <td><span class="status-tag online"><i></i>Online</span></td>
-                    <td>v2.3.1</td>
-                    <td>24.6 dB</td>
-                    <td>48°C</td>
-                  </tr>
+                <tbody id="devices-watch-rows">
+                  <tr><td colspan="4">Loading devices to watch…</td></tr>
                 </tbody>
               </table>
+            </div>
+            <div class="devices-watch-footer">
+              <p id="devices-watch-status" role="status">Loading latest snapshot…</p>
+              <button class="summary-retry" id="devices-watch-retry" type="button" hidden>Retry</button>
             </div>
           </article>
 
@@ -366,6 +349,6 @@
         </main>
       </div>
     </div>
-    <script type="module" src="scripts/overview.js?v=20260926-remote-simulator"></script>
+    <script type="module" src="scripts/overview.js?v=20261001-devices-watch"></script>
   </body>
 </html>

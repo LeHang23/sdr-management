@@ -58,6 +58,7 @@ points for device investigation and remote reconfiguration.
 - The default simulator heartbeat interval shall be 60 seconds. The default
   stale-device timeout shall be 180 seconds so a device is not marked Offline
   until it misses three expected heartbeats.
+- Fleet Summary, Fleet Health, and Devices to Watch shall use the same snapshot and freshness state. The watch preview shall contain up to five devices and show the full needs-attention count.
 - Changing a chart time range shall not reload the entire page.
 - Selecting a device, alert, `View all`, `All`, or primary action shall open the
   corresponding target screen or workflow when available.

@@ -1,4 +1,5 @@
 import { readSnapshot } from './database.js';
+import { getDevicesToWatch } from './devices-to-watch.js';
 
 export const ACTIVE_JOB_STATUSES = ['queued', 'deploying', 'verifying', 'retrying'];
 
@@ -76,6 +77,7 @@ export function getOverviewSummary(database) {
       },
       metrics: { totalDevices, onlineNow, needsAttention, activeJobs },
       details: {
+        devicesToWatch: getDevicesToWatch(database, needsAttention),
         addedThisMonth,
         healthCounts,
         activeJobCounts,

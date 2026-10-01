@@ -1097,6 +1097,16 @@ td small {
 .status-tag.offline i { background: var(--red-500); }
 .status-tag.online { color: #087b59; background: #eafaf4; }
 .status-tag.online i { background: var(--green-500); }
+.status-tag.updating { color: var(--blue-600); background: #eef5ff; }
+.status-tag.updating i { background: var(--blue-600); }
+
+.devices-card td:first-child { min-width: 110px; max-width: 160px; white-space: normal; overflow-wrap: anywhere; }
+.devices-watch-issue { min-width: 140px; max-width: 230px; white-space: normal; overflow-wrap: anywhere; }
+.devices-watch-message { white-space: normal; }
+.devices-watch-footer { display: flex; align-items: center; gap: 12px; padding: 12px 8px 0; }
+.devices-watch-footer p { margin: 0; color: var(--slate-500); font-size: 10px; }
+.devices-card.is-stale .devices-watch-footer p,
+.devices-card.is-unavailable .devices-watch-footer p { color: #986c00; }
 .hot-value { color: #c47b00; }
 
 .alert-list {
