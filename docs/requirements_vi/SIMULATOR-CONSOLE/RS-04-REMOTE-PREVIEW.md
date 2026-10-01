@@ -8,7 +8,7 @@
 
 ## Mục tiêu
 
-Xem và điều khiển demo từ thiết bị khác khi máy cá nhân đã tắt.
+Xem và điều khiển demo từ thiết bị khác qua host/VM đang chạy.
 
 ## Yêu cầu
 
@@ -20,13 +20,13 @@ Xem và điều khiển demo từ thiết bị khác khi máy cá nhân đã t�
 | RS-SIM-REMOTE-04 | Hỗ trợ Console ở /simulator/ và / độc lập; điều khiển và polling dùng đúng prefix hiện tại. |
 | RS-SIM-REMOTE-05 | Link điều hướng Dashboard dùng URL hosting public độc lập với địa chỉ heartbeat nội bộ. |
 | RS-SIM-REMOTE-06 | Chỉ trả health tối thiểu không cần credential preview; bảo vệ dữ liệu thiết bị bằng xác thực. |
-| RS-SIM-REMOTE-07 | Startup hosted chạy backend và simulator cùng nhau, không cần máy cá nhân; shutdown đóng cả hai. |
-| RS-SIM-REMOTE-08 | Ghi rõ service miễn phí có thể ngủ và storage demo tạm thời; không cam kết giả lập liên tục hoặc history bền vững. |
+| RS-SIM-REMOTE-07 | Startup hosted chạy backend và simulator cùng nhau, trong runtime được chọn; host/VM phải tiếp tục chạy và shutdown đóng cả hai. |
+| RS-SIM-REMOTE-08 | Ghi rõ yêu cầu uptime host/VM và storage DB demo; không cam kết giả lập liên tục khi host đã tắt. |
 
 ## Trạng thái và trường hợp biên
 
 - Credential thiếu/sai trả 401; mật khẩu hosted không hợp lệ làm startup thất bại.
-- Render Free có thể ngủ và mất dữ liệu demo sau restart/deploy.
+- Tắt host/VM làm dừng demo. Việc giữ dữ liệu phụ thuộc storage và backup được cấu hình.
 
 ## Tiêu chí nghiệm thu
 

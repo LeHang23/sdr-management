@@ -8,7 +8,7 @@
 
 ## Goal
 
-View and control the demo from another device while the personal computer is off.
+View and control the demo from another device through the running host/VM.
 
 ## Requirements
 
@@ -20,13 +20,13 @@ View and control the demo from another device while the personal computer is off
 | RS-SIM-REMOTE-04 | Support the Console at /simulator/ and standalone /; controls and polling shall resolve under the active prefix. |
 | RS-SIM-REMOTE-05 | The Dashboard navigation link shall use the public hosting URL independently of the internal heartbeat destination. |
 | RS-SIM-REMOTE-06 | Serve only a minimal health response without preview credentials; protect device data behind authentication. |
-| RS-SIM-REMOTE-07 | Hosted startup shall run backend and simulator together without requiring the personal computer; shutdown shall close both. |
-| RS-SIM-REMOTE-08 | Document free-service sleep and ephemeral demo storage; do not promise continuous simulation or durable history. |
+| RS-SIM-REMOTE-07 | Hosted startup shall run backend and simulator together in the selected runtime; the host/VM must remain running and shutdown shall close both. |
+| RS-SIM-REMOTE-08 | Document host/VM uptime and demo database storage requirements; do not promise continuous simulation when the host is off. |
 
 ## States and edge cases
 
 - Missing/wrong credentials return 401; invalid hosted passwords prevent startup.
-- Render Free may sleep and lose demo data on restart/deploy.
+- Stopping the host/VM stops the demo. Database retention depends on the configured storage and backup.
 
 ## Acceptance criteria
 

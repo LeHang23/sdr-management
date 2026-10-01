@@ -55,4 +55,4 @@ Quan sát và điều khiển simulator qua HTTP độc lập với DB ứng d�
 - Lịch hiển thị khớp trạng thái process, không suy đoán Offline backend.
 - Đọc Offline đã xác nhận từ backend, sửa danh sách thiết bị và giả lập command/job vẫn dự kiến.
 
-- Hosted preview yêu cầu xác thực; URL HTTPS thật được kiểm tra sau khi tạo service Render.
+- Hosted preview yêu cầu xác thực; URL HTTPS thật được kiểm tra sau khi cấu hình truy cập từ xa trên VM Linux đang chạy.

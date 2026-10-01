@@ -43,7 +43,7 @@ try {
   previewAuth(username, process.env.SDR_PREVIEW_PASSWORD, 'SDR preview');
   const port = integerSetting(process.env, 'PORT', 4173, 1, 65_535);
   const host = process.env.HOST ?? '127.0.0.1';
-  const publicUrl = process.env.SDR_DASHBOARD_PUBLIC_URL ?? process.env.RENDER_EXTERNAL_URL ?? `http://127.0.0.1:${port}`;
+  const publicUrl = process.env.SDR_DASHBOARD_PUBLIC_URL ?? `http://127.0.0.1:${port}`;
   const gatewayToken = process.env.SDR_GATEWAY_TOKEN ?? randomBytes(32).toString('hex');
   const reservation = reservePort();
   await new Promise((resolve, reject) => {

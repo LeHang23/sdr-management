@@ -18,7 +18,7 @@ async function hosted(t, overrides = {}) {
   await new Promise((resolve) => reservation.close(resolve));
   const url = `http://127.0.0.1:${port}`;
   const child = spawn(process.execPath, ['backend/scripts/hosted-preview.js'], {
-    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), SDR_DATABASE_PATH: join(directory, 'demo.db'), SDR_PREVIEW_PASSWORD: password, SDR_PREVIEW_USER: 'admin', SDR_GATEWAY_TOKEN: 'hosted-test-token', SDR_SIMULATOR_DEVICE_COUNT: '2', SDR_SIMULATOR_INTERVAL_MS: '250', SDR_SIMULATOR_REQUEST_TIMEOUT_MS: '200', RENDER_EXTERNAL_URL: 'https://sdr-demo.example', ...overrides },
+    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), SDR_DATABASE_PATH: join(directory, 'demo.db'), SDR_PREVIEW_PASSWORD: password, SDR_PREVIEW_USER: 'admin', SDR_GATEWAY_TOKEN: 'hosted-test-token', SDR_SIMULATOR_DEVICE_COUNT: '2', SDR_SIMULATOR_INTERVAL_MS: '250', SDR_SIMULATOR_REQUEST_TIMEOUT_MS: '200', SDR_DASHBOARD_PUBLIC_URL: 'https://sdr-demo.example', ...overrides },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let output = '';

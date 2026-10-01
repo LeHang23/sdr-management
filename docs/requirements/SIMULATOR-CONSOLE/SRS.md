@@ -55,4 +55,4 @@ Inspect and control a remote HTTP-based simulator independently of the applicati
 - The displayed schedule matches process state and never infers backend Offline.
 - Reading backend-confirmed Offline, editable device inventory and command/job simulation remain planned.
 
-- Hosted preview requires authentication; verify the actual HTTPS URL after creating the Render service.
+- Hosted preview requires authentication; verify the actual HTTPS URL after configuring remote access on the running Linux VM.
