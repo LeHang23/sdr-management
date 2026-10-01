@@ -11,6 +11,10 @@ try {
     'backend/src/overview-summary.js',
     'backend/src/system-performance.js',
     'backend/src/server.js',
+    'backend/src/preview-auth.js',
+    'backend/scripts/hosted-preview.js',
+    'backend/test/hosted-preview.test.js',
+    'backend/test/preview-auth.test.js',
     'backend/test/overview-summary.test.js',
     'backend/test/gateway-ingestion.test.js',
     'backend/test/device-simulator.test.js',
@@ -26,6 +30,8 @@ try {
   }
 
   node --check backend/src/server.js
+  node --check backend/src/preview-auth.js
+  node --check backend/scripts/hosted-preview.js
   node --check backend/src/gateway-ingestion.js
   node --check backend/simulator/device-simulator.js
   node --check backend/simulator/simulator-config.js

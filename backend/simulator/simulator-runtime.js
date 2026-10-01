@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { previewAuth } from '../src/preview-auth.js';
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,6 +9,7 @@ const allowedModes = new Set(['auto', 'online', 'warning', 'updating', 'disconne
 
 export function createSimulator(config, logger = console) {
   const { serverUrl, gatewayToken, intervalMs, requestTimeoutMs, deviceCount, controlHost, controlPort, runOnce } = config;
+  const authorizeConsole = previewAuth(config.consoleUser, config.consolePassword, 'SDR Management preview');
   let stopping = false;
   let generation = 0;
   let activeTick = null;
@@ -216,6 +218,7 @@ export function createSimulator(config, logger = console) {
       nextTickAt: nextTickAt === null ? null : new Date(nextTickAt).toISOString(),
       sending: Boolean(activeTick),
       serverUrl,
+      dashboardUrl: config.dashboardUrl ?? serverUrl,
       controlUrl: `http://${controlHost}:${controlServer?.address()?.port ?? controlPort}`,
       totals,
       devices,
@@ -263,6 +266,16 @@ export function createSimulator(config, logger = console) {
   }
 
   const controlServer = runOnce ? null : createServer(async (request, response) => {
+    if (!authorizeConsole(request, response)) return;
+    // Browser Basic credentials are ambient: reject cross-site control submissions.
+    if (!['GET', 'HEAD'].includes(request.method) && request.headers.origin) {
+      let origin;
+      try { origin = new URL(request.headers.origin); } catch {}
+      if (!origin || origin.host !== request.headers.host) {
+        sendJson(response, 403, { error: 'Cross-origin simulator control is not allowed' });
+        return;
+      }
+    }
     const url = new URL(request.url, `http://${request.headers.host ?? `${controlHost}:${controlPort}`}`);
     if (request.method === 'GET' && url.pathname === '/') {
       const html = await readFile(consolePath);

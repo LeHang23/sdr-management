@@ -66,6 +66,8 @@ test('rejects invalid configuration instead of silently creating a wrong fleet',
     assert.throws(() => readSimulatorConfig({ SDR_GATEWAY_TOKEN: 'x', SDR_SERVER_URL: url }));
   }
   assert.throws(() => readSimulatorConfig({ SDR_GATEWAY_TOKEN: ' ' }), /TOKEN/);
+  assert.throws(() => readSimulatorConfig({ SDR_GATEWAY_TOKEN: 'x', SDR_SIMULATOR_CONSOLE_PASSWORD: 'short' }), /PASSWORD/);
+  assert.throws(() => readSimulatorConfig({ SDR_GATEWAY_TOKEN: 'x', SDR_DASHBOARD_PUBLIC_URL: 'http://user:pass@host' }), /PUBLIC_URL/);
   assert.equal(readSimulatorConfig({ SDR_GATEWAY_TOKEN: 'x', SDR_SIMULATOR_DEVICE_COUNT: '100' }).deviceCount, 100);
 });
 
@@ -245,6 +247,33 @@ test('shutdown cancels pending requests without waiting for a long interval or d
   assert.ok(Date.now() - started < 1000);
   assert.equal(instance.controlServer.listening, false);
   assert.equal(instance.status().nextTickAt, null);
+});
+
+test('remote Console authenticates every route, rejects cross-site control and hides credentials', async (t) => {
+  const backendUrl = await backend(t, (request, response) => { response.writeHead(202); response.end('{}'); });
+  const password = 'test-console-password';
+  const { instance, url } = await simulator(t, backendUrl, {
+    consoleUser: 'admin', consolePassword: password, dashboardUrl: 'https://demo-dashboard.example',
+  });
+  const authorization = `Basic ${Buffer.from(`admin:${password}`).toString('base64')}`;
+  for (const [path, method, body] of [['/', 'GET'], ['/api/status', 'GET'], ['/api/control', 'POST', '{"action":"pause"}'], ['/api/devices/SIM-SDR-001/mode', 'PUT', '{"mode":"warning"}']]) {
+    const response = await fetch(url + path, { method, body });
+    assert.equal(response.status, 401);
+    assert.match(response.headers.get('www-authenticate'), /Basic/);
+  }
+  assert.equal((await fetch(url, { headers: { Authorization: 'Basic wrong' } })).status, 401);
+  const statusResponse = await fetch(`${url}/api/status`, { headers: { Authorization: authorization } });
+  const status = await statusResponse.json();
+  assert.equal(status.dashboardUrl, 'https://demo-dashboard.example');
+  assert.equal(status.serverUrl, backendUrl);
+  assert.ok(!JSON.stringify(status).includes(password));
+  assert.ok(!JSON.stringify(status).includes('test-token'));
+  const crossSite = await fetch(`${url}/api/control`, { method: 'POST', headers: { Authorization: authorization, Origin: 'https://attacker.example', 'Content-Type': 'application/json' }, body: '{"action":"pause"}' });
+  assert.equal(crossSite.status, 403);
+  assert.equal(instance.status().running, true);
+  const sameSite = await fetch(`${url}/api/control`, { method: 'POST', headers: { Authorization: authorization, Origin: url, 'Content-Type': 'application/json' }, body: '{"action":"pause"}' });
+  assert.equal(sameSite.status, 200);
+  assert.equal(instance.status().running, false);
 });
 
 

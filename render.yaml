@@ -4,11 +4,21 @@ services:
     runtime: node
     plan: free
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: npm run start:hosted
     healthCheckPath: /health
     autoDeployTrigger: commit
     envVars:
       - key: HOST
         value: 0.0.0.0
-      - key: SDR_SEED_DEMO
-        value: "true"
+      - key: NODE_VERSION
+        value: "24"
+      - key: SDR_PREVIEW_USER
+        value: admin
+      - key: SDR_PREVIEW_PASSWORD
+        generateValue: true
+      - key: SDR_GATEWAY_TOKEN
+        generateValue: true
+      - key: SDR_SIMULATOR_INTERVAL_MS
+        value: "5000"
+      - key: SDR_SIMULATOR_REQUEST_TIMEOUT_MS
+        value: "2000"

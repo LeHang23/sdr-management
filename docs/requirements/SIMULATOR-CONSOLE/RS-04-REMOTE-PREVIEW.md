@@ -1,0 +1,34 @@
+# RS-04 - Protected remote preview
+
+| Field | Value |
+| --- | --- |
+| Screen | SDR Simulator Console |
+| FBS | FBS-3.1 |
+| Priority | Must |
+
+## Goal
+
+View and control the demo from another device while the personal computer is off.
+
+## Requirements
+
+| ID | Requirement |
+| --- | --- |
+| RS-SIM-REMOTE-01 | Require preview authentication for hosted Dashboard and all Console pages/APIs; fail startup without a strong password. |
+| RS-SIM-REMOTE-02 | Use the same preview credentials for both interfaces while keeping the gateway token separate and server-side. |
+| RS-SIM-REMOTE-03 | Reject cross-site browser requests that change simulator controls. |
+| RS-SIM-REMOTE-04 | Support the Console at /simulator/ and standalone /; controls and polling shall resolve under the active prefix. |
+| RS-SIM-REMOTE-05 | The Dashboard navigation link shall use the public hosting URL independently of the internal heartbeat destination. |
+| RS-SIM-REMOTE-06 | Serve only a minimal health response without preview credentials; protect device data behind authentication. |
+| RS-SIM-REMOTE-07 | Hosted startup shall run backend and simulator together without requiring the personal computer; shutdown shall close both. |
+| RS-SIM-REMOTE-08 | Document free-service sleep and ephemeral demo storage; do not promise continuous simulation or durable history. |
+
+## States and edge cases
+
+- Missing/wrong credentials return 401; invalid hosted passwords prevent startup.
+- Render Free may sleep and lose demo data on restart/deploy.
+
+## Acceptance criteria
+
+- Verify both pages/APIs on one port, authentication, mode/control and the public Dashboard URL.
+- Complete actual HTTPS verification only after a successful deployment.

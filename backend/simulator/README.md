@@ -46,8 +46,7 @@ bound to `127.0.0.1` unless access is protected by a trusted network or VPN.
 Use `npm.cmd run simulator:once` for one heartbeat per device; one-shot mode
 does not start the console.
 
-To run the simulator from another computer, copy the repository (or this
-simulator module), set `SDR_SERVER_URL` to the backend's reachable HTTP address,
+To run the simulator from another computer, copy the repository, set `SDR_SERVER_URL` to the backend's reachable HTTP address,
 and use the same gateway token. Use a VPN or HTTPS before sending a token over
 an untrusted network.
 
@@ -122,3 +121,23 @@ consistently or choose an explicit server policy.
 Run `npm.cmd test` (or `npm test`) for HTTP, CLI exit-code, configuration and
 Console-control regression coverage. Tests use temporary local servers and an
 isolated database; they do not require real SDR hardware.
+
+## Hosted access when the personal computer is off
+
+The Render demo uses one service: Dashboard at `/` and Console at `/simulator/`.
+Use `npm run start:hosted` for this mode and follow
+[`docs/deployment/RENDER-PREVIEW.md`](../../docs/deployment/RENDER-PREVIEW.md).
+No tunnel or always-on personal computer is required. Render Free may sleep,
+and simulator/SQLite history is demo data rather than permanent storage.
+
+`SDR_PREVIEW_PASSWORD` is mandatory in hosted mode; `SDR_PREVIEW_USER` defaults
+to `admin`. All Dashboard/Console reads and controls require authentication.
+The hosted health check contains no device data and remains public. The gateway
+uses its own token, which is never sent to the browser.
+
+For a standalone Console, set `SDR_SIMULATOR_CONSOLE_PASSWORD` (at least 12
+nonblank characters) and optionally `SDR_SIMULATOR_CONSOLE_USER`. For remote
+preview, use HTTPS. `SDR_DASHBOARD_PUBLIC_URL` controls the browser's Dashboard
+link independently of `SDR_SERVER_URL`, the simulator's heartbeat destination.
+The hosted runner derives the public URL from `RENDER_EXTERNAL_URL`; heartbeat
+traffic stays on loopback. Console API paths work at both `/` and `/simulator/`.

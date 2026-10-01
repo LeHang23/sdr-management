@@ -25,6 +25,7 @@ Inspect and control a remote HTTP-based simulator independently of the applicati
 | SRS-SIM-01 | Heartbeat reliability | RS-01-HEARTBEAT-RELIABILITY.md |
 | SRS-SIM-02 | Process controls | RS-02-PROCESS-CONTROLS.md |
 | SRS-SIM-03 | Status and schedule | RS-03-STATUS-AND-SCHEDULE.md |
+| SRS-SIM-04 | Protected remote preview access | RS-04-REMOTE-PREVIEW.md |
 
 ## 5. Screen states
 
@@ -35,11 +36,12 @@ Inspect and control a remote HTTP-based simulator independently of the applicati
 | Paused | No future batch; pending waits cancelled |
 | Error | Show transport/control failure and retain inspectable history |
 | Disconnected scenario | Skip sends; do not claim confirmed backend Offline |
+| Preview unauthorized | Browser requests credentials; APIs return 401 |
 | Backend rejects token | Report HTTP rejection without exposing credentials |
 
 ## 6. Data and interaction
 
-- Console polls simulator status each second; controls use local HTTP APIs. No direct DB access.
+- Console polls simulator status each second; controls use HTTP APIs under the served prefix. No direct DB access.
 - Reset affects simulator state only; mode changes apply to the next batch.
 
 ## 7. Non-functional screen requirements
@@ -52,3 +54,5 @@ Inspect and control a remote HTTP-based simulator independently of the applicati
 - HTTP timeout, one-shot exit codes, control races and backend recovery have regression coverage.
 - The displayed schedule matches process state and never infers backend Offline.
 - Reading backend-confirmed Offline, editable device inventory and command/job simulation remain planned.
+
+- Hosted preview requires authentication; verify the actual HTTPS URL after creating the Render service.

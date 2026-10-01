@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { openDatabase, migrateDatabase, seedDatabase } from './database.js';
 import { getOverviewSummary } from './overview-summary.js';
 import { getSystemPerformance, PERFORMANCE_RANGES } from './system-performance.js';
+import { previewAuth } from './preview-auth.js';
 import {
   GatewayIngestionError,
   expireStaleGatewayDevices,
@@ -20,6 +21,7 @@ const databasePath = process.env.SDR_DATABASE_PATH ?? resolve(rootDirectory, 'ba
 const host = process.env.HOST ?? '127.0.0.1';
 const port = Number(process.env.PORT ?? 4173);
 const gatewayToken = process.env.SDR_GATEWAY_TOKEN;
+const authorizePreview = previewAuth(process.env.SDR_PREVIEW_USER ?? 'admin', process.env.SDR_PREVIEW_PASSWORD, 'SDR Management preview');
 const heartbeatTimeoutMs = Number(process.env.SDR_HEARTBEAT_TIMEOUT_MS ?? 180_000);
 if (!Number.isInteger(heartbeatTimeoutMs) || heartbeatTimeoutMs < 1 || heartbeatTimeoutMs > 2_147_483_647) {
   console.error('SDR_HEARTBEAT_TIMEOUT_MS must be an integer between 1 and 2147483647.');
@@ -110,6 +112,9 @@ async function serveStatic(pathname, response) {
 
 const server = createServer(async (request, response) => {
   const url = new URL(request.url, `http://${request.headers.host ?? `${host}:${port}`}`);
+  // Gateway ingestion uses its own Bearer token; protect all other preview routes.
+  const isHeartbeat = request.method === 'POST' && /^\/api\/v1\/gateway\/devices\/[^/]+\/heartbeat$/.test(url.pathname);
+  if (!isHeartbeat && !authorizePreview(request, response)) return;
   if (request.method === 'GET' && url.pathname === '/health') {
     sendJson(response, 200, { status: 'ok' });
     return;

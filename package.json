@@ -13,6 +13,7 @@
     "db:seed": "node backend/scripts/database-cli.js seed",
     "simulator": "node backend/simulator/device-simulator.js",
     "simulator:once": "node backend/simulator/device-simulator.js --once",
+    "start:hosted": "node backend/scripts/hosted-preview.js",
     "test": "node --test backend/test/*.test.js",
     "validate": "powershell -ExecutionPolicy Bypass -File ai-skills/sdr-frontend/scripts/validate_frontend.ps1 && powershell -ExecutionPolicy Bypass -File ai-skills/sdr-backend/scripts/validate_backend.ps1"
   }

@@ -69,6 +69,20 @@ must write into the same durable model and preserve API contracts.
 - Cover HTTP headers/body timeouts, exit codes, recovery and in-flight controls
   in `backend/test/device-simulator.test.js`.
 
+## Hosted demo
+
+- `backend/scripts/hosted-preview.js` owns the Render process lifecycle and one
+  public port. Keep Dashboard and simulator state separate and use HTTP ingestion.
+- Require `SDR_PREVIEW_PASSWORD` before binding hosted endpoints. Protect all
+  data and controls; leave only a minimal health response public. Preserve
+  gateway Bearer authentication and reject cross-site browser control writes.
+- Keep public navigation URLs separate from internal heartbeat URLs. Console
+  requests must resolve under its `/simulator/` prefix as well as standalone `/`.
+- Generate deployment secrets through Render environment settings, never source.
+- Document free-service sleep and ephemeral SQLite; do not claim 24/7 uptime.
+- Actual HTTPS deployment checks require a created Render service; do not mark
+  those tasks complete based only on local tests.
+
 ## Verification
 
 Run the relevant commands after changes:

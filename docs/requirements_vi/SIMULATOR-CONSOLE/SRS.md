@@ -25,6 +25,7 @@ Quan sát và điều khiển simulator qua HTTP độc lập với DB ứng d�
 | SRS-SIM-01 | Độ tin cậy heartbeat | RS-01-HEARTBEAT-RELIABILITY.md |
 | SRS-SIM-02 | Điều khiển process | RS-02-PROCESS-CONTROLS.md |
 | SRS-SIM-03 | Trạng thái và lịch gửi | RS-03-STATUS-AND-SCHEDULE.md |
+| SRS-SIM-04 | Truy cập preview từ xa có bảo vệ | RS-04-REMOTE-PREVIEW.md |
 
 ## 5. Trạng thái màn hình
 
@@ -35,11 +36,12 @@ Quan sát và điều khiển simulator qua HTTP độc lập với DB ứng d�
 | Paused | Không gửi batch tiếp; hủy chờ request |
 | Error | Hiện lỗi transport/control, giữ history để kiểm tra |
 | Disconnected scenario | Bỏ gửi; không xác nhận Offline backend |
+| Preview unauthorized | Trình duyệt yêu cầu credential; API trả 401 |
 | Backend rejects token | Báo HTTP từ chối, không lộ credential |
 
 ## 6. Dữ liệu và tương tác
 
-- Console poll status simulator mỗi giây; điều khiển dùng HTTP API cục bộ. Không truy cập DB trực tiếp.
+- Console poll status simulator mỗi giây; điều khiển dùng HTTP API qua prefix đang phục vụ. Không truy cập DB trực tiếp.
 - Reset chỉ đổi trạng thái simulator; mode mới áp dụng ở batch tiếp theo.
 
 ## 7. Yêu cầu phi chức năng
@@ -52,3 +54,5 @@ Quan sát và điều khiển simulator qua HTTP độc lập với DB ứng d�
 - Có regression test cho timeout HTTP, one-shot exit code, race điều khiển và backend phục hồi.
 - Lịch hiển thị khớp trạng thái process, không suy đoán Offline backend.
 - Đọc Offline đã xác nhận từ backend, sửa danh sách thiết bị và giả lập command/job vẫn dự kiến.
+
+- Hosted preview yêu cầu xác thực; URL HTTPS thật được kiểm tra sau khi tạo service Render.
