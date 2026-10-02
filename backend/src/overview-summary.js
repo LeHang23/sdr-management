@@ -57,7 +57,8 @@ export function getOverviewSummary(database) {
     const source = database.prepare(`
       SELECT CASE
         WHEN EXISTS (SELECT 1 FROM devices WHERE source = 'sdr_gateway' AND id NOT LIKE 'SIM-SDR-%')
-          OR EXISTS (SELECT 1 FROM reconfiguration_jobs WHERE source = 'sdr_gateway')
+          OR EXISTS (SELECT 1 FROM reconfiguration_jobs j WHERE source = 'sdr_gateway'
+            AND NOT EXISTS (SELECT 1 FROM simulator_commands c WHERE c.job_id = j.id))
         THEN 'sdr_gateway'
         WHEN EXISTS (SELECT 1 FROM devices WHERE source = 'sdr_gateway' AND id LIKE 'SIM-SDR-%')
         THEN 'simulator'

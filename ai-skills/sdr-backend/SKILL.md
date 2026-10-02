@@ -53,6 +53,37 @@ must write into the same durable model and preserve API contracts.
   entry easier. Until access control is implemented, manual input is through
   the local database or controlled scripts.
 
+## Simulator reliability
+
+- Keep CLI configuration in `backend/simulator/simulator-config.js` and isolate
+  instance state in `simulator-runtime.js`; imports must not start a process.
+- Bound heartbeat requests through response-body consumption. Continuous mode
+  recovers on its next batch; one-shot mode exits nonzero on any failed send.
+- Validate integer settings at startup, without silently clamping device count.
+- Preserve start-to-start cadence, skip elapsed slots and prevent overlapping batches.
+- Pause/reset/mode changes cancel obsolete attempts; late results must not mutate
+  the current generation. Cancellation cannot undo backend ingestion.
+- Console transport failure or skipped sends do not establish backend Offline.
+- Keep backend Offline timeout explicit and document three times the simulator
+  interval plus sweep latency. Do not silently change server policy from clients.
+- Cover HTTP headers/body timeouts, exit codes, recovery and in-flight controls
+  in `backend/test/device-simulator.test.js`.
+
+## Hosted demo
+
+- `backend/scripts/hosted-preview.js` owns the combined preview process lifecycle and one
+  public port. Keep Dashboard and simulator state separate and use HTTP ingestion.
+- Require `SDR_PREVIEW_PASSWORD` before binding hosted endpoints. Protect all
+  data and controls; leave only a minimal health response public. Preserve
+  gateway Bearer authentication and reject cross-site browser control writes.
+- Keep public navigation URLs separate from internal heartbeat URLs. Console
+  requests must resolve under its `/simulator/` prefix as well as standalone `/`.
+- Configure preview secrets through the runtime environment, never source.
+- Document host/VM uptime and SQLite storage/backup requirements; do not claim
+  continuous operation while the host is off.
+- Actual HTTPS access checks require the configured remote endpoint; do not mark
+  those tasks complete based only on local tests.
+
 ## Verification
 
 Run the relevant commands after changes:
@@ -74,3 +105,13 @@ real SDR integration works until a gateway or physical-device adapter exists.
 - Do not replace manual data with random telemetry or claim it is live.
 - Do not change requirements just to fit the implementation; use the
   requirements workflow if the product rule itself needs clarification.
+
+## Simulator extensions
+
+Use `gateway-status.js` for authenticated backend-confirmed state and
+`simulator-jobs.js` for virtual job lifecycle. Simulator code never opens SQLite;
+it polls Bearer APIs and persists only its local inventory/command receipts JSON.
+Keep these records ignored by Git. Restrict virtual commands and inventory to
+SIM-SDR- IDs and preserve simulator source labels even when jobs use gateway storage.
+Deduplicate application atomically with configuration and test redelivery/restart,
+terminal timeouts, conflicting results, and malformed/physical targets.
