@@ -15,7 +15,7 @@ Cho người kiểm thử quan sát transport và thời gian thực tế, khôn
 | ID | Requirement |
 | --- | --- |
 | RS-SIM-STATUS-01 | Hiện trạng thái transport, health dự định gần nhất, payload/response, lỗi, thời điểm accepted và counter, không lộ gateway token. |
-| RS-SIM-STATUS-02 | Transport skipped/failed không được ghi là Offline đã xác nhận từ backend. Console nêu rõ không đọc trạng thái Offline backend. |
+| RS-SIM-STATUS-02 | Transport skipped/failed không được ghi là Offline đã xác nhận từ backend. Poll trạng thái backend có xác thực độc lập với heartbeat, kể cả khi pause. Hiện connectivity/health đã xác nhận, updatedAt và checkedAt; đọc lỗi báo Unknown, xác nhận cũ là stale. |
 | RS-SIM-STATUS-03 | Hiện thời điểm/countdown batch tiếp theo thực tế hoặc Sending/Paused, cùng interval, request timeout và timeout backend đề xuất. |
 | RS-SIM-STATUS-04 | Refresh card tại chỗ, giữ payload details đang mở, scroll và lựa chọn mode đang thao tác. |
 

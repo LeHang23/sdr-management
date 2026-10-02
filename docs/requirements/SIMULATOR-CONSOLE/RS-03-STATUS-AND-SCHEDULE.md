@@ -15,7 +15,7 @@ Let testers inspect actual simulator transport and timing without mistaking them
 | ID | Requirement |
 | --- | --- |
 | RS-SIM-STATUS-01 | Display transport status, last intended health, payload/response, errors, acceptance time and counters without exposing the gateway token. |
-| RS-SIM-STATUS-02 | Skipped/failed transport shall not be labelled backend-confirmed Offline. The Console shall state that it does not read backend Offline status. |
+| RS-SIM-STATUS-02 | Skipped/failed transport shall not be labelled backend-confirmed Offline. Poll authenticated backend status independently of heartbeat sends, including while paused. Show confirmed connectivity/health, updatedAt and checkedAt; read failure is Unknown and prior confirmations are stale. |
 | RS-SIM-STATUS-03 | Display the actual next batch time/countdown, or Sending/Paused, with interval, request timeout and the recommended backend timeout. |
 | RS-SIM-STATUS-04 | Refresh device cards in place and preserve open payload details, scroll and active mode selection. |
 

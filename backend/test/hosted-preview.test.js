@@ -18,7 +18,7 @@ async function hosted(t, overrides = {}) {
   await new Promise((resolve) => reservation.close(resolve));
   const url = `http://127.0.0.1:${port}`;
   const child = spawn(process.execPath, ['backend/scripts/hosted-preview.js'], {
-    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), SDR_DATABASE_PATH: join(directory, 'demo.db'), SDR_PREVIEW_PASSWORD: password, SDR_PREVIEW_USER: 'admin', SDR_GATEWAY_TOKEN: 'hosted-test-token', SDR_SIMULATOR_DEVICE_COUNT: '2', SDR_SIMULATOR_INTERVAL_MS: '250', SDR_SIMULATOR_REQUEST_TIMEOUT_MS: '200', SDR_DASHBOARD_PUBLIC_URL: 'https://sdr-demo.example', ...overrides },
+    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), SDR_DATABASE_PATH: join(directory, 'demo.db'), SDR_SIMULATOR_STATE_PATH: join(directory, 'simulator.json'), SDR_PREVIEW_PASSWORD: password, SDR_PREVIEW_USER: 'admin', SDR_GATEWAY_TOKEN: 'hosted-test-token', SDR_SIMULATOR_DEVICE_COUNT: '2', SDR_SIMULATOR_INTERVAL_MS: '250', SDR_SIMULATOR_REQUEST_TIMEOUT_MS: '200', SDR_DASHBOARD_PUBLIC_URL: 'https://sdr-demo.example', ...overrides },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let output = '';
@@ -99,4 +99,34 @@ test('hosted mode fails closed without a strong preview password', async (t) => 
     assert.equal(await app.closed, 1);
     assert.match(app.output(), /password|PASSWORD/i);
   }
+});
+
+test('combined preview manages inventory and simulated commands end to end with auth and source labels', async (t) => {
+  const app = await hosted(t);
+  await until(() => app.output().includes('Hosted preview ready'), 'Hosted startup failed: ' + app.output());
+  const status = () => app.request('/simulator/api/status').then((r) => r.json());
+  const json = (path, method, body, origin = app.url) => app.request(path, { method, headers: { Origin: origin, 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
+  assert.equal((await app.request('/simulator/console-devices.js', {}, false)).status, 401);
+  assert.equal((await app.request('/simulator/console-devices.js')).status, 200);
+  assert.equal((await json('/simulator/api/devices', 'POST', { id: 'SIM-SDR-extra' }, 'https://attacker.example')).status, 403);
+  assert.equal((await json('/simulator/api/devices', 'POST', { id: 'SIM-SDR-extra', displayName: 'Lab device' })).status, 201);
+  await until(async () => (await status()).devices.find((d) => d.id === 'SIM-SDR-extra')?.backendState.available, 'No backend-confirmed state');
+  const direct = '/api/v1/gateway/devices/SIM-SDR-extra/status';
+  assert.equal((await app.request(direct)).status, 401, 'Preview credentials must not authorize gateway reads');
+  assert.equal((await app.request(direct, { headers: { Authorization: 'Bearer hosted-test-token' } }, false)).status, 200);
+  for (const [outcome, expected] of [['success', 'succeeded'], ['failure', 'failed'], ['timeout', 'failed']]) {
+    const jobId = `e2e-${outcome}`;
+    const response = await json('/simulator/api/jobs', 'POST', { jobId, deviceIds: ['SIM-SDR-extra'], telemetry: { snrDb: 25 }, outcome, timeoutMs: outcome === 'timeout' ? 1000 : 5000 });
+    assert.equal(response.status, 202, await response.text());
+    await until(async () => (await status()).jobs.find((job) => job.jobId === jobId)?.status === expected, `${outcome} did not complete`);
+  }
+  assert.equal((await status()).devices.find((d) => d.id === 'SIM-SDR-extra').telemetry.snrDb, 25);
+  assert.equal((await (await app.request('/api/v1/overview/summary')).json()).source.mode, 'simulator');
+  const serialized = JSON.stringify(await status());
+  assert.ok(!serialized.includes('hosted-test-token'));
+  assert.ok(!serialized.includes(password));
+  assert.equal((await json('/simulator/api/devices/SIM-SDR-extra', 'DELETE')).status, 200);
+  assert.ok(!(await status()).devices.some((d) => d.id === 'SIM-SDR-extra'));
+  const summary = await (await app.request('/api/v1/overview/summary')).json();
+  assert.equal(summary.metrics.totalDevices, 3, 'Simulator deletion retains backend history');
 });

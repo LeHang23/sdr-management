@@ -8,6 +8,8 @@ import { openDatabase, migrateDatabase, seedDatabase } from './database.js';
 import { getOverviewSummary } from './overview-summary.js';
 import { getSystemPerformance, PERFORMANCE_RANGES } from './system-performance.js';
 import { previewAuth } from './preview-auth.js';
+import { getGatewayDeviceStatus } from './gateway-status.js';
+import { createSimulatorJob, listSimulatorJobs, pollSimulatorCommands, acceptSimulatorResult, expireSimulatorJobs } from './simulator-jobs.js';
 import {
   GatewayIngestionError,
   expireStaleGatewayDevices,
@@ -113,8 +115,32 @@ async function serveStatic(pathname, response) {
 const server = createServer(async (request, response) => {
   const url = new URL(request.url, `http://${request.headers.host ?? `${host}:${port}`}`);
   // Gateway ingestion uses its own Bearer token; protect all other preview routes.
-  const isHeartbeat = request.method === 'POST' && /^\/api\/v1\/gateway\/devices\/[^/]+\/heartbeat$/.test(url.pathname);
-  if (!isHeartbeat && !authorizePreview(request, response)) return;
+  const isGateway = /^\/api\/v1\/gateway\/devices\/[^/]+\/(heartbeat|status|commands|results)$/.test(url.pathname) || url.pathname === '/api/v1/simulator/jobs';
+  if (isGateway ? !authorizeGateway(request, response) : !authorizePreview(request, response)) return;
+  const commandMatch = url.pathname.match(/^\/api\/v1\/gateway\/devices\/([^/]+)\/(commands|results)$/);
+  if (commandMatch || url.pathname === '/api/v1/simulator/jobs') {
+    try {
+      if (request.method === 'GET' && url.pathname === '/api/v1/simulator/jobs') {
+        sendJson(response, 200, { jobs: listSimulatorJobs(database) });
+      } else if (request.method === 'POST' && url.pathname === '/api/v1/simulator/jobs') {
+        const jobId = createSimulatorJob(database, await readJson(request));
+        sendJson(response, 202, { jobId });
+      } else if (request.method === 'GET' && commandMatch?.[2] === 'commands') {
+        sendJson(response, 200, { commands: pollSimulatorCommands(database, decodeURIComponent(commandMatch[1])) });
+      } else if (request.method === 'POST' && commandMatch?.[2] === 'results') {
+        sendJson(response, 200, acceptSimulatorResult(database, decodeURIComponent(commandMatch[1]), await readJson(request)));
+      } else sendJson(response, 405, { error: 'Method not allowed' });
+    } catch (error) { sendJson(response, error.statusCode ?? 400, { error: error.message }); }
+    return;
+  }
+  const statusMatch = url.pathname.match(/^\/api\/v1\/gateway\/devices\/([^/]+)\/status$/);
+  if (request.method === 'GET' && statusMatch) {
+    try {
+      const status = getGatewayDeviceStatus(database, decodeURIComponent(statusMatch[1]));
+      sendJson(response, status ? 200 : 404, status ?? { error: 'Device not found' });
+    } catch (error) { sendJson(response, 400, { error: error.message }); }
+    return;
+  }
   if (request.method === 'GET' && url.pathname === '/health') {
     sendJson(response, 200, { status: 'ok' });
     return;
@@ -198,6 +224,7 @@ const expirationTimer = gatewayToken
   ? setInterval(() => {
       try {
         expireStaleGatewayDevices(database, new Date(Date.now() - heartbeatTimeoutMs).toISOString());
+        expireSimulatorJobs(database);
       } catch (error) {
         console.error('Could not expire stale gateway devices', error);
       }

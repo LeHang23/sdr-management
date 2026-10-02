@@ -6,7 +6,7 @@
 | --- | --- |
 | Screen | SDR Simulator Console |
 | Role | Developer / tester |
-| Design status | Implemented base; further scenarios planned |
+| Design status | Implemented simulation; physical integration planned |
 | Figma frame | Not available |
 | FBS reference | FBS-3.1 |
 
@@ -26,6 +26,9 @@ Inspect and control a remote HTTP-based simulator independently of the applicati
 | SRS-SIM-02 | Process controls | RS-02-PROCESS-CONTROLS.md |
 | SRS-SIM-03 | Status and schedule | RS-03-STATUS-AND-SCHEDULE.md |
 | SRS-SIM-04 | Protected remote preview access | RS-04-REMOTE-PREVIEW.md |
+| SRS-SIM-05 | Inventory | RS-05-DEVICE-INVENTORY.md |
+| SRS-SIM-06 | Telemetry and transport scenarios | RS-06-TELEMETRY-SCENARIOS.md |
+| SRS-SIM-07 | Simulated reconfiguration | RS-07-SIMULATED-RECONFIGURATION.md |
 
 ## 5. Screen states
 
@@ -42,7 +45,7 @@ Inspect and control a remote HTTP-based simulator independently of the applicati
 ## 6. Data and interaction
 
 - Console polls simulator status each second; controls use HTTP APIs under the served prefix. No direct DB access.
-- Reset affects simulator state only; mode changes apply to the next batch.
+- Reset clears counters/scenarios, retains inventory and command receipts; mode changes apply to the next batch. Backend status polling continues while paused. Command execution pauses with the simulator.
 
 ## 7. Non-functional screen requirements
 
@@ -53,6 +56,6 @@ Inspect and control a remote HTTP-based simulator independently of the applicati
 
 - HTTP timeout, one-shot exit codes, control races and backend recovery have regression coverage.
 - The displayed schedule matches process state and never infers backend Offline.
-- Reading backend-confirmed Offline, editable device inventory and command/job simulation remain planned.
+- Backend-confirmed status, persisted inventory/scenarios and simulated job outcomes are implemented and regression-tested. Physical SDR integration remains planned.
 
 - Hosted preview requires authentication; verify the actual HTTPS URL after configuring remote access on the running Linux VM.

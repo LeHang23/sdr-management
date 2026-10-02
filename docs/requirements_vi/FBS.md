@@ -106,7 +106,7 @@ SDR Management
 | FBS-2.1 | Login | Authentication | Sign in, session errors, password recovery | Hoãn lại |
 | FBS-2.2 | Users | Quản lý người dùng | Invite, edit, activate, deactivate, role assignment | Hoãn lại |
 | FBS-2.3 | Roles | Authorization | Roles, permissions, protected action mapping | Hoãn lại |
-| FBS-3.1 | Simulator | Giả lập thiết bị từ xa | Simulator Console độc lập, heartbeat có timeout, điều khiển an toàn, lịch gửi và preview hosted có bảo vệ; command và kết quả job vẫn dự kiến | Đã triển khai một phần |
+| FBS-3.1 | Simulator | Giả lập thiết bị từ xa | Console độc lập, heartbeat có timeout, trạng thái backend, inventory/kịch bản được lưu, command/job giả lập có xác thực và preview HTTPS riêng; tích hợp SDR vật lý vẫn dự kiến | Đã triển khai một phần |
 | FBS-3.2 | Device Gateway | Nhận dữ liệu có xác thực | Nhận heartbeat và telemetry, nhận diện nguồn và timeout thiết bị stale | Đã triển khai |
 | FBS-3.4 | System settings | Cấu hình nền tảng | Thresholds, retention, notification rules, environments | Dự kiến |
 

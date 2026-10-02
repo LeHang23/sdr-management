@@ -20,7 +20,7 @@ async function backend(t, handler) {
   return `http://127.0.0.1:${server.address().port}`;
 }
 function config(serverUrl, extra = {}) {
-  return { ...readSimulatorConfig({ SDR_GATEWAY_TOKEN: 'test-token', SDR_SERVER_URL: serverUrl }), controlPort: 0, deviceCount: 1, intervalMs: 250, requestTimeoutMs: 150, ...extra };
+  return { ...readSimulatorConfig({ SDR_GATEWAY_TOKEN: 'test-token', SDR_SERVER_URL: serverUrl }), controlPort: 0, deviceCount: 1, monitorEnabled: false, intervalMs: 250, requestTimeoutMs: 150, ...extra };
 }
 async function simulator(t, serverUrl, extra) {
   const instance = createSimulator(config(serverUrl, extra), silent);
@@ -190,7 +190,7 @@ test('Console pause/resume/reset and mode API preserve control state during in-f
   assert.equal(instance.status().recommendedHeartbeatTimeoutMs, 3000);
   assert.ok(Date.parse(instance.status().nextTickAt) > Date.now());
   const page = await (await fetch(consoleUrl)).text();
-  assert.match(page, /Backend Offline status is not read/);
+  assert.match(page, /Backend status is read independently/);
 });
 
 test('forced modes reach heartbeat payload and disconnected mode skips until recovery', async (t) => {
@@ -304,8 +304,10 @@ test('real backend ingestion updates Overview, expires paused devices and recove
     await rm(directory, { recursive: true, force: true });
   });
   await until(() => output.includes('SDR Management running'), 'Backend did not start: ' + output);
-  const { instance, control } = await simulator(t, url);
+  const { instance, control } = await simulator(t, url, { monitorEnabled: true, backendPollIntervalMs: 100 });
   await until(() => instance.status().totals.accepted >= 1);
+  await until(() => instance.status().devices[0].backendState.available);
+  assert.equal(instance.status().devices[0].backendState.snapshot.connectionStatus, 'online');
   const summary = () => fetch(`${url}/api/v1/overview/summary`).then((response) => response.json());
   assert.equal((await summary()).metrics.onlineNow, 1);
   await control('pause');
@@ -317,8 +319,31 @@ test('real backend ingestion updates Overview, expires paused devices and recove
   }
   assert.equal(snapshot.metrics.onlineNow, 0);
   assert.equal(snapshot.details.healthCounts.offline, 1);
+  await until(() => instance.status().devices[0].backendState.snapshot?.connectionStatus === 'offline');
   const before = instance.status().totals.accepted;
   await control('resume');
   await until(() => instance.status().totals.accepted > before);
   assert.equal((await summary()).metrics.onlineNow, 1);
+});
+
+
+test('backend status becomes unknown on read failure and retains a stale snapshot without inferring Offline', async (t) => {
+  let available = true;
+  const url = await backend(t, (request, response) => {
+    if (request.url.endsWith('/status')) {
+      response.writeHead(available ? 200 : 503, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify(available ? {
+        deviceId: 'SIM-SDR-001', connectionStatus: 'online', healthStatus: 'warning',
+        updatedAt: new Date().toISOString(), checkedAt: new Date().toISOString(),
+      } : { error: 'Unavailable' }));
+    } else { response.writeHead(202); response.end('{}'); }
+  });
+  const { instance } = await simulator(t, url, { monitorEnabled: true, backendPollIntervalMs: 50 });
+  await until(() => instance.status().devices[0].backendState.available);
+  available = false;
+  await until(() => !instance.status().devices[0].backendState.available);
+  assert.equal(instance.status().devices[0].backendState.snapshot.connectionStatus, 'online');
+  assert.match(instance.status().devices[0].backendState.lastError, /503/);
+  available = true;
+  await until(() => instance.status().devices[0].backendState.available);
 });

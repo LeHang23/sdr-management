@@ -3,3 +3,5 @@
 backend/data/*.db
 backend/data/*.db-shm
 backend/data/*.db-wal
+backend/data/*.json
+backend/data/*.json.tmp

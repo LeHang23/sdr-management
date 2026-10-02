@@ -159,13 +159,17 @@ powershell -ExecutionPolicy Bypass -File ai-skills/sdr-backend/scripts/validate_
 credentials stay on the server. The host machine and VM must remain running.
 
 See [`docs/deployment/SELF-HOSTED-PREVIEW.md`](docs/deployment/SELF-HOSTED-PREVIEW.md)
-for the shared runtime and configuration. Linux VM and remote HTTPS access will
-be configured separately; no public URL is currently provided.
+for the shared runtime, Ubuntu user service and private Tailscale HTTPS setup.
+The operator confirmed the service and access from another device on 2 October
+2026; reboot recovery still needs verification. No public deployment URL is provided.
 
 ## Simulator reliability
 
 The independent Simulator Console supports bounded heartbeat requests, explicit
-one-shot failure exit codes and safe pause/resume/reset controls. See
+one-shot failure exit codes, safe pause/resume/reset controls, backend-confirmed
+status, persisted device inventory, editable telemetry/fault scenarios and
+authenticated simulated reconfiguration jobs. These virtual jobs do not configure
+physical SDR hardware. See
 [`backend/simulator/README.md`](backend/simulator/README.md) for configuration,
 interval/Offline policy and control semantics. Requirements are mirrored under
 `docs/requirements/SIMULATOR-CONSOLE/` and `docs/requirements_vi/SIMULATOR-CONSOLE/`.

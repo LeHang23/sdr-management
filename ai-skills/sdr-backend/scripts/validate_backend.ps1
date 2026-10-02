@@ -11,6 +11,13 @@ try {
     'backend/src/overview-summary.js',
     'backend/src/system-performance.js',
     'backend/src/server.js',
+    'backend/src/gateway-status.js',
+    'backend/src/simulator-jobs.js',
+    'backend/simulator/simulator-inventory.js',
+    'backend/simulator/console-devices.js',
+    'backend/simulator/console-jobs.js',
+    'backend/test/simulator-inventory.test.js',
+    'backend/test/simulator-jobs.test.js',
     'backend/src/preview-auth.js',
     'backend/scripts/hosted-preview.js',
     'backend/test/hosted-preview.test.js',
@@ -29,6 +36,11 @@ try {
     }
   }
 
+  node --check backend/src/gateway-status.js
+  node --check backend/src/simulator-jobs.js
+  node --check backend/simulator/simulator-inventory.js
+  node --check backend/simulator/console-devices.js
+  node --check backend/simulator/console-jobs.js
   node --check backend/src/server.js
   node --check backend/src/preview-auth.js
   node --check backend/scripts/hosted-preview.js

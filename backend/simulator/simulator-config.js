@@ -34,5 +34,8 @@ export function readSimulatorConfig(env = process.env, argv = process.argv) {
     controlHost: env.SDR_SIMULATOR_CONTROL_HOST ?? '127.0.0.1',
     controlPort: integerSetting(env, 'SDR_SIMULATOR_CONTROL_PORT', 4_180, 1, 65_535),
     runOnce: argv.includes('--once'),
+    backendPollIntervalMs: 1000,
+    monitorEnabled: true,
+    statePath: env.SDR_SIMULATOR_STATE_PATH || null,
   };
 }

@@ -62,6 +62,7 @@ try {
     SDR_SIMULATOR_INTERVAL_MS: process.env.SDR_SIMULATOR_INTERVAL_MS ?? '5000',
     SDR_SIMULATOR_REQUEST_TIMEOUT_MS: process.env.SDR_SIMULATOR_REQUEST_TIMEOUT_MS ?? '2000',
     SDR_SIMULATOR_CONTROL_HOST: '127.0.0.1',
+    SDR_SIMULATOR_STATE_PATH: process.env.SDR_SIMULATOR_STATE_PATH ?? fileURLToPath(new URL('../data/simulator-state.json', import.meta.url)),
   }, []);
   dashboard = spawn(process.execPath, ['backend/src/server.js'], {
     cwd: root,

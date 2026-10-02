@@ -3,6 +3,9 @@ import { previewAuth } from '../src/preview-auth.js';
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { setTimeout as delay } from 'node:timers/promises';
+import { inventoryStore, normalizeDevice } from './simulator-inventory.js';
+import { randomUUID } from 'node:crypto';
 
 const consolePath = resolve(dirname(fileURLToPath(import.meta.url)), 'console.html');
 const allowedModes = new Set(['auto', 'online', 'warning', 'updating', 'disconnected']);
@@ -19,6 +22,9 @@ export function createSimulator(config, logger = console) {
   let running = true;
   let tick = 0;
   let lastTickAt = null;
+  let monitorTimer = null;
+  let monitorWork = null;
+  const monitorRequests = new Set();
   const startedAt = new Date().toISOString();
   const totals = { accepted: 0, skipped: 0, failed: 0 };
 
@@ -26,10 +32,9 @@ export function createSimulator(config, logger = console) {
     return `SIM-SDR-${String(index + 1).padStart(3, '0')}`;
   }
 
-  const devices = Array.from({ length: deviceCount }, (_, index) => ({
-    id: deviceId(index),
-    displayName: deviceId(index),
-    mode: 'auto',
+  const store = inventoryStore(config.statePath, Array.from({ length: deviceCount }, (_, index) => ({ id: deviceId(index) })));
+  function createDevice(definition) { return {
+    ...definition,
     transportStatus: 'waiting',
     intendedHealthStatus: null,
     missedHeartbeats: 0,
@@ -39,7 +44,89 @@ export function createSimulator(config, logger = console) {
     lastPayload: null,
     lastResponse: null,
     lastError: null,
-  }));
+    backendState: { available: false, snapshot: null, lastError: null },
+  }; }
+  const devices = store.state.devices.map(createDevice);
+  let jobs = [];
+  let jobsError = null;
+  function saveInventory(candidate = devices, executions) { store.save(candidate, executions); }
+
+  async function backendRequest(path, options = {}) {
+    const controller = new AbortController();
+    monitorRequests.add(controller);
+    const timer = setTimeout(() => controller.abort(), requestTimeoutMs);
+    try {
+      const response = await fetch(`${serverUrl}${path}`, {
+        ...options, signal: controller.signal,
+        headers: { Authorization: `Bearer ${gatewayToken}`, 'Content-Type': 'application/json', ...options.headers },
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(`Backend returned HTTP ${response.status}`);
+      return body;
+    } finally { clearTimeout(timer); monitorRequests.delete(controller); }
+  }
+
+  async function pollBackend() {
+    await Promise.all(devices.map(async (device) => {
+      try {
+        const snapshot = await backendRequest(`/api/v1/gateway/devices/${encodeURIComponent(device.id)}/status`);
+        if (snapshot.deviceId !== device.id || !['online', 'offline'].includes(snapshot.connectionStatus)
+          || !['online', 'warning', 'offline', 'updating'].includes(snapshot.healthStatus)
+          || !Number.isFinite(Date.parse(snapshot.updatedAt)) || !Number.isFinite(Date.parse(snapshot.checkedAt))) {
+          throw new Error('Invalid backend status');
+        }
+        if (!stopping && devices.includes(device)) device.backendState = { available: true, snapshot, lastError: null };
+      } catch (error) {
+        if (!stopping && devices.includes(device)) device.backendState = { ...device.backendState, available: false, lastError: error.message };
+      }
+      if (!stopping && running && devices.includes(device) && device.mode !== 'disconnected' && device.fault === 'normal') {
+        try { await receiveCommands(device); }
+        catch (error) { device.commandError = error.message; }
+      }
+    }));
+    if (!stopping) {
+      try {
+        const result = await backendRequest('/api/v1/simulator/jobs');
+        if (!Array.isArray(result.jobs)) throw new Error('Invalid job response');
+        jobs = result.jobs;
+        jobsError = null;
+      } catch (error) { if (!stopping) jobsError = error.message; }
+    }
+  }
+
+  async function receiveCommands(device) {
+    const result = await backendRequest(`/api/v1/gateway/devices/${encodeURIComponent(device.id)}/commands`);
+    if (!Array.isArray(result.commands)) throw new Error('Invalid commands response');
+    for (const command of result.commands) {
+      if (stopping || !running || !devices.includes(device) || device.mode === 'disconnected' || device.fault !== 'normal') return;
+      if (command.deviceId !== device.id || typeof command.jobId !== 'string' || command.jobId.length > 64
+        || !['success', 'failure', 'timeout'].includes(command.outcome) || !Number.isFinite(Date.parse(command.deadlineAt))) throw new Error('Invalid command');
+      if (Date.parse(command.deadlineAt) <= Date.now()) continue;
+      const key = JSON.stringify([command.jobId, device.id]);
+      let execution = store.state.executions[key];
+      if (!execution) {
+        const definition = normalizeDevice({ ...device, telemetry: { ...device.telemetry, ...command.telemetry } });
+        execution = { jobId: command.jobId, deviceId: device.id, status: command.outcome === 'success' ? 'succeeded' : command.outcome === 'failure' ? 'failed' : 'timeout', appliedAt: new Date().toISOString() };
+        // Persist the applied configuration and its receipt in one atomic file replacement.
+        // A retry (including after restart) must only resend the result, never reapply.
+        saveInventory(devices.map((d) => d === device && command.outcome === 'success' ? definition : d), { ...store.state.executions, [key]: execution });
+        if (command.outcome === 'success') {
+          cancelAttempt(device);
+          Object.assign(device, definition);
+        }
+      }
+      device.lastCommand = execution;
+      device.commandError = null;
+      if (execution.status !== 'timeout') {
+        await backendRequest(`/api/v1/gateway/devices/${encodeURIComponent(device.id)}/results`, { method: 'POST', body: JSON.stringify(execution) });
+      }
+    }
+  }
+
+  function monitor() {
+    if (stopping || monitorWork) return;
+    monitorWork = pollBackend().finally(() => { monitorWork = null; });
+  }
 
   function automaticDeviceState(index, currentTick) {
     const phase = currentTick + index * 2;
@@ -89,6 +176,7 @@ export function createSimulator(config, logger = console) {
         sampledAt,
         throughputMbps: Number(state.throughputMbps.toFixed(1)),
         snrDb: Number(state.snrDb.toFixed(1)),
+        ...device.telemetry,
       },
     };
     device.transportStatus = 'sending';
@@ -104,6 +192,8 @@ export function createSimulator(config, logger = console) {
     const isCurrent = () => attempts.get(device.id) === controller;
 
     try {
+      if (device.fault === 'network_loss') throw new Error('Simulated network loss: no request sent');
+      if (device.fault === 'timeout') await delay(requestTimeoutMs + 100, undefined, { signal: controller.signal });
       const response = await fetch(
         `${serverUrl}/api/v1/gateway/devices/${encodeURIComponent(device.id)}/heartbeat`,
         {
@@ -222,6 +312,7 @@ export function createSimulator(config, logger = console) {
       controlUrl: `http://${controlHost}:${controlServer?.address()?.port ?? controlPort}`,
       totals,
       devices,
+      jobs, jobsError, persistenceEnabled: Boolean(config.statePath),
     };
   }
 
@@ -245,6 +336,7 @@ export function createSimulator(config, logger = console) {
   }
 
   function resetSimulator() {
+    saveInventory(devices.map((device) => ({ ...device, mode: 'auto', fault: 'normal', telemetry: {} })));
     invalidateTick();
     tick = 0;
     lastTickAt = null;
@@ -253,6 +345,8 @@ export function createSimulator(config, logger = console) {
     totals.failed = 0;
     for (const device of devices) {
       device.mode = 'auto';
+      device.fault = 'normal';
+      device.telemetry = {};
       device.transportStatus = 'waiting';
       device.intendedHealthStatus = null;
       device.missedHeartbeats = 0;
@@ -283,8 +377,55 @@ export function createSimulator(config, logger = console) {
       response.end(html);
       return;
     }
+    if (request.method === 'GET' && ['/console-devices.js', '/console-jobs.js'].includes(url.pathname)) {
+      const script = await readFile(new URL(`.${url.pathname}`, import.meta.url));
+      response.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store' });
+      response.end(script);
+      return;
+    }
     if (request.method === 'GET' && url.pathname === '/api/status') {
       sendJson(response, 200, publicStatus());
+      return;
+    }
+    if (request.method === 'POST' && url.pathname === '/api/jobs') {
+      try {
+        const body = await readJson(request);
+        if (!Array.isArray(body.deviceIds) || body.deviceIds.some((id) => !devices.some((device) => device.id === id))) throw new Error('Choose devices in this simulator inventory');
+        const result = await backendRequest('/api/v1/simulator/jobs', { method: 'POST', body: JSON.stringify({ ...body, jobId: body.jobId ?? randomUUID() }) });
+        sendJson(response, 202, result);
+      } catch (error) { sendJson(response, 400, { error: error.message }); }
+      return;
+    }
+    if (request.method === 'POST' && url.pathname === '/api/devices') {
+      try {
+        const definition = normalizeDevice(await readJson(request));
+        if (devices.some((d) => d.id === definition.id)) { sendJson(response, 409, { error: 'Device ID already exists' }); return; }
+        const device = createDevice(definition);
+        saveInventory([...devices, device]);
+        devices.push(device);
+        sendJson(response, 201, publicStatus());
+      } catch (error) { sendJson(response, 400, { error: error.message }); }
+      return;
+    }
+    const inventoryMatch = url.pathname.match(/^\/api\/devices\/([^/]+)$/);
+    if (inventoryMatch && ['PUT', 'DELETE'].includes(request.method)) {
+      try {
+        const device = devices.find((d) => d.id === decodeURIComponent(inventoryMatch[1]));
+        if (!device) { sendJson(response, 404, { error: 'Simulator device not found' }); return; }
+        if (request.method === 'DELETE') {
+          saveInventory(devices.filter((d) => d !== device));
+          cancelAttempt(device);
+          devices.splice(devices.indexOf(device), 1);
+        } else {
+          const body = await readJson(request);
+          if (body.id !== undefined && body.id !== device.id) throw new Error('Device ID cannot be changed; add a new device instead');
+          const next = normalizeDevice({ ...device, ...body });
+          saveInventory(devices.map((d) => d === device ? next : d));
+          cancelAttempt(device);
+          Object.assign(device, next);
+        }
+        sendJson(response, 200, publicStatus());
+      } catch (error) { sendJson(response, 400, { error: error.message }); }
       return;
     }
     if (request.method === 'POST' && url.pathname === '/api/control') {
@@ -328,6 +469,7 @@ export function createSimulator(config, logger = console) {
           sendJson(response, 400, { error: `mode must be one of: ${[...allowedModes].join(', ')}` });
           return;
         }
+        saveInventory(devices.map((d) => d === device ? { ...d, mode: body.mode } : d));
         cancelAttempt(device);
         device.mode = body.mode;
         if (body.mode !== 'disconnected') device.missedHeartbeats = 0;
@@ -356,17 +498,22 @@ export function createSimulator(config, logger = console) {
     }
     nextTickAt = Date.now();
     schedule();
+    if (config.monitorEnabled !== false) {
+      monitorTimer = setInterval(monitor, config.backendPollIntervalMs ?? 1000);
+    }
   }
 
   async function stop() {
     stopping = true;
     running = false;
     invalidateTick();
+    clearInterval(monitorTimer);
+    for (const controller of monitorRequests) controller.abort();
     const closed = controlServer?.listening ? new Promise((resolve, reject) => {
       controlServer.close((error) => error ? reject(error) : resolve());
       controlServer.closeAllConnections();
     }) : Promise.resolve();
-    await Promise.all([activeTick, closed]);
+    await Promise.all([activeTick, monitorWork, closed]);
   }
 
   return { start, stop, status: publicStatus, controlServer };

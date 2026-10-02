@@ -105,3 +105,13 @@ real SDR integration works until a gateway or physical-device adapter exists.
 - Do not replace manual data with random telemetry or claim it is live.
 - Do not change requirements just to fit the implementation; use the
   requirements workflow if the product rule itself needs clarification.
+
+## Simulator extensions
+
+Use `gateway-status.js` for authenticated backend-confirmed state and
+`simulator-jobs.js` for virtual job lifecycle. Simulator code never opens SQLite;
+it polls Bearer APIs and persists only its local inventory/command receipts JSON.
+Keep these records ignored by Git. Restrict virtual commands and inventory to
+SIM-SDR- IDs and preserve simulator source labels even when jobs use gateway storage.
+Deduplicate application atomically with configuration and test redelivery/restart,
+terminal timeouts, conflicting results, and malformed/physical targets.
