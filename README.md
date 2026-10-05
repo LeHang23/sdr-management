@@ -95,7 +95,7 @@ Use lowercase kebab-case file names for additional diagram images.
 
 ## Local application preview
 
-The Overview frontend now reads Fleet Summary, Fleet Health, Devices to Watch,
+The Overview frontend now reads Fleet Summary, Fleet Health, Devices to Watch, Recent Alerts,
 and System Performance through
 the Node.js API, so run
 the application server rather than a standalone static Python server:
@@ -106,11 +106,11 @@ npm.cmd start
 
 Then open [http://localhost:4173/](http://localhost:4173/). A static server can render the page but
 cannot serve `/api/v1/overview/summary` or `/api/v1/overview/performance`, so
-the KPI cards, health chart, watch list, and performance chart will be unavailable.
+the KPI cards, health chart, watch list, recent alerts, and performance chart will be unavailable.
 
 ## Local backend and manual simulator data
 
-Fleet Summary, Fleet Health, Devices to Watch, and System Performance read from
+Fleet Summary, Fleet Health, Devices to Watch, Recent Alerts, and System Performance read from
 a Node.js API and a local SQLite database. No physical
 SDR is required: enter or edit simulator records directly in
 `backend/data/sdr-management.db` with a SQLite editor, or start with the
@@ -144,7 +144,26 @@ snapshot as the KPI cards. Active critical issues rank first, Offline next,
 then Warning, with the latest issue/device update breaking ties. It shows the
 full needs-attention count, ignores resolved issues, and displays `Never seen`
 for missing last-seen timestamps. Device Detail and filtered `View all` remain
-planned. Recent Alerts still uses prototype data.
+planned.
+
+Recent Alerts reads the latest three `device_issues` from the same Summary
+snapshot, including resolved history, with a full unresolved count. Each row
+shows severity, device, data source, occurrence time and Active/Resolved status.
+Gateway Warning opens a Warning incident; Offline (including heartbeat expiry)
+opens a Critical incident. Repeated unchanged health does not duplicate or
+reorder incidents. Healthy/Updating resolves generated incidents; a new unhealthy
+state or later recurrence creates another incident. Manual findings are untouched.
+Loading, empty, unavailable, cached/stale and Retry states share Overview refresh.
+Alert Detail and `All` inbox navigation remain planned; acknowledge/resolve APIs,
+threshold-derived metric alerts and job alerts are not part of this preview.
+
+Database initialization automatically adds the `device_issues.kind` column and
+indexes to existing databases, preserving rows. Existing unhealthy devices get
+an automatic incident on their next accepted unhealthy heartbeat or gateway
+expiry; migration itself does not invent historical events. Health changes and
+incident writes commit together. History follows the existing issue/device
+lifecycle (deleting a backend device cascades its issues). Source labels use the
+associated device data source; `SIM-SDR-*` gateway devices are labeled simulator.
 
 ## Backend skill
 

@@ -3,6 +3,7 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { migrateSimulatorJobs } from './simulator-jobs.js';
+import { migrateRecentAlerts } from './recent-alerts.js';
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const databaseDirectory = resolve(currentDirectory, '../database');
@@ -19,6 +20,7 @@ export function openDatabase(databasePath) {
 
 export function migrateDatabase(database) {
   database.exec(readFileSync(schemaPath, 'utf8'));
+  migrateRecentAlerts(database);
   migrateSimulatorJobs(database);
 }
 

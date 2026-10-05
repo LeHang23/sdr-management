@@ -107,3 +107,28 @@ Heartbeat timeout must be a positive integer. For a simulator fleet sharing one
 interval, configure the backend timeout to three times that interval; expiry
 is applied on the next sweep (up to five seconds later). The client does not
 change this server policy.
+
+## Recent Alerts and gateway health incidents
+
+`details.recentAlerts` belongs to the same Summary read transaction. Return
+`total`, `unresolved`, `limit` (3), and newest-first `items` ordered by occurrence,
+then alert ID. Include all severities and resolved history. Each item has
+`alertId`, `deviceId`, `displayName`, `severity`, `status`, `summary`, `occurredAt`,
+`updatedAt` and device-derived `source` (`mode`/`label`). Never fabricate metric
+threshold or job alerts from UI examples.
+
+`recent-alerts.js` owns idempotent migration of `device_issues.kind` (default
+`manual`) and the partial unique index for one active `gateway_health` incident
+per device. Existing rows remain manual. No historical alert is synthesized by
+migration. Gateway Warning/Offline opens Warning/Critical respectively; changed
+unhealthy state resolves the previous generated incident and opens a new one.
+Healthy/Updating resolves generated incidents only. Repeated unchanged health
+preserves original occurrence and issue update timestamps. History is retained
+in `device_issues`, subject to its existing device-delete cascade. Manual issues
+are never automatically resolved. No acknowledge/resolve write API is exposed.
+
+Call health synchronization inside the same heartbeat/telemetry or expiry write
+transaction, rolling back device state if incident persistence fails. Revision
+triggers include incident insert/update/delete so ETags and all Overview sections
+stay coherent. Test legacy migration, repeated seed, deduplication, recurrence,
+recovery, counts, chronological preview, source labels and rollback.
