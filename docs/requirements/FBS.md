@@ -76,7 +76,7 @@ SDR Management
 | FBS-1.1.1 | Overview | Fleet summary | Total devices, online devices, devices needing attention, active jobs | Designed |
 | FBS-1.1.2 | Overview | System performance | Throughput and SNR trends, time-range control, chart legend | Designed |
 | FBS-1.1.3 | Overview | Fleet health | Healthy, Warning, Offline, and Updating health distribution | Designed |
-| FBS-1.1.4 | Overview | Devices to watch | Prioritized device list, state, issue summary, last seen, detail action, and `View all` navigation to the filtered Device Management list | Designed |
+| FBS-1.1.4 | Overview | Devices to watch | Prioritized device list, state, issue summary, last seen, detail action, and `View all` navigation to the filtered Device Management list | Partially implemented |
 | FBS-1.1.5 | Overview | Recent alerts | Severity, alert summary, source, time, navigation to alert detail, and `All` access to the complete Alert inbox | Designed |
 | FBS-1.1.6 | Overview | Reconfiguration action | New reconfiguration call to action | Designed |
 | FBS-1.2 | Devices | Device list | Search, filters, sorting, pagination, health and connection status, bulk selection | Planned |

@@ -9,6 +9,7 @@ try {
     'backend/src/database.js',
     'backend/src/gateway-ingestion.js',
     'backend/src/overview-summary.js',
+    'backend/src/devices-to-watch.js',
     'backend/src/system-performance.js',
     'backend/src/server.js',
     'backend/src/gateway-status.js',
@@ -23,6 +24,7 @@ try {
     'backend/test/hosted-preview.test.js',
     'backend/test/preview-auth.test.js',
     'backend/test/overview-summary.test.js',
+    'backend/test/devices-to-watch.test.js',
     'backend/test/gateway-ingestion.test.js',
     'backend/test/device-simulator.test.js',
     'backend/simulator/simulator-config.js',
@@ -49,6 +51,7 @@ try {
   node --check backend/simulator/simulator-config.js
   node --check backend/simulator/simulator-runtime.js
   node --check backend/src/overview-summary.js
+  node --check backend/src/devices-to-watch.js
   node --check backend/src/system-performance.js
   npm.cmd run test
   Write-Output 'Backend validation passed.'
