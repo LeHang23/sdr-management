@@ -152,12 +152,24 @@ The skill is stored in `ai-skills/sdr-backend/` and validates the backend with:
 powershell -ExecutionPolicy Bypass -File ai-skills/sdr-backend/scripts/validate_backend.ps1
 ```
 
-## Free Render preview
+## Protected preview on one machine
 
-The repository includes `render.yaml` for a free Render web service. The cloud
-service listens on Render's assigned `PORT`, exposes `/health` for health
-checks, and seeds demo records when its SQLite database is empty.
+`npm run start:hosted` runs the Dashboard at `/` and Simulator Console at
+`/simulator/` through one port. Both pages require a preview password; gateway
+credentials stay on the server. The host machine and VM must remain running.
 
-The free service filesystem is ephemeral. It is suitable for reviewing the UI
-and API, but manual database changes may be lost after a restart or redeploy.
-Use persistent storage or a managed database before storing important data.
+See [`docs/deployment/SELF-HOSTED-PREVIEW.md`](docs/deployment/SELF-HOSTED-PREVIEW.md)
+for the shared runtime, Ubuntu user service and private Tailscale HTTPS setup.
+The operator confirmed the service and access from another device on 2 October
+2026; reboot recovery still needs verification. No public deployment URL is provided.
+
+## Simulator reliability
+
+The independent Simulator Console supports bounded heartbeat requests, explicit
+one-shot failure exit codes, safe pause/resume/reset controls, backend-confirmed
+status, persisted device inventory, editable telemetry/fault scenarios and
+authenticated simulated reconfiguration jobs. These virtual jobs do not configure
+physical SDR hardware. See
+[`backend/simulator/README.md`](backend/simulator/README.md) for configuration,
+interval/Offline policy and control semantics. Requirements are mirrored under
+`docs/requirements/SIMULATOR-CONSOLE/` and `docs/requirements_vi/SIMULATOR-CONSOLE/`.

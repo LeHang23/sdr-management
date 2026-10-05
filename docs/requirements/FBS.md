@@ -106,7 +106,7 @@ SDR Management
 | FBS-2.1 | Login | Authentication | Sign in, session errors, password recovery | Deferred |
 | FBS-2.2 | Users | User management | Invite, edit, activate, deactivate, role assignment | Deferred |
 | FBS-2.3 | Roles | Authorization | Roles, permissions, protected action mapping | Deferred |
-| FBS-3.1 | Simulator | Remote device simulation | Device generation, heartbeat and telemetry scenarios; command and job outcomes remain planned | Partially implemented |
+| FBS-3.1 | Simulator | Remote device simulation | Independent Console, bounded heartbeats, backend-confirmed state, persisted inventory/scenarios, authenticated simulated command/job outcomes and private HTTPS preview; physical SDR integration remains planned | Partially implemented |
 | FBS-3.2 | Device Gateway | Authenticated ingestion | Device heartbeat and telemetry ingestion, source identification, and stale-device timeout | Implemented |
 | FBS-3.4 | System settings | Platform configuration | Thresholds, retention, notification rules, environments | Planned |
 

@@ -13,8 +13,21 @@
     }
     * { box-sizing: border-box; }
     body { margin: 0; min-width: 320px; }
-    button, select { font: inherit; }
-    button:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid rgba(37, 99, 235, .28); outline-offset: 2px; }
+    button, select, input { font: inherit; }
+    input, select { max-width: 100%; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .form-grid label { display: grid; gap: 6px; min-width: 0; color: #627386; font-size: 13px; }
+    .form-grid input, .form-grid select { width: 100%; padding: 9px; border: 1px solid #cbd7e3; border-radius: 8px; }
+    .management-panel { margin-top: 24px; padding: 20px; }
+    dialog { width: min(620px, calc(100% - 24px)); border: 1px solid #cbd7e3; border-radius: 16px; padding: 24px; }
+    dialog::backdrop { background: #10243888; }
+    dialog .actions { margin-top: 18px; }
+    .job-item { margin-top: 12px; padding: 12px; background: #f5f8fb; border-radius: 8px; overflow-wrap: anywhere; }
+    .job-item p { margin-bottom: 0; line-height: 1.6; }
+    .device-title { min-width: 0; }
+    .device-title h3 { overflow-wrap: anywhere; }
+    button:disabled { opacity: .55; cursor: wait; }
+    button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid rgba(37, 99, 235, .28); outline-offset: 2px; }
     .shell { width: min(1240px, calc(100% - 32px)); margin: 0 auto; padding: 30px 0 48px; }
     .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
     .eyebrow { margin: 0 0 6px; color: #2563eb; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
@@ -59,6 +72,7 @@
     .dot.skipped { background: #dd9307; box-shadow: 0 0 0 4px rgba(221, 147, 7, .14); }
     .dot.failed { background: #dc4658; box-shadow: 0 0 0 4px rgba(220, 70, 88, .14); }
     .status { display: inline-flex; align-items: center; min-height: 28px; padding: 4px 9px; border-radius: 999px; background: #e7f6f0; color: #087653; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+    .status.unknown { background: #edf0f4; color: #576779; }
     .status.warning { background: #fff2d5; color: #9c6200; }
     .status.updating { background: #eee9ff; color: #6242c5; }
     .status.offline, .status.failed { background: #fee8eb; color: #b92f43; }
@@ -123,16 +137,52 @@
       <div class="process-node"><strong>Admin backend</strong><span id="server-url">Loading target…</span></div>
     </section>
 
+    <p class="legend" id="schedule-status" aria-live="polite">Loading heartbeat schedule…</p>
     <div class="section-head">
       <h2>Virtual devices</h2>
+      <button class="button" id="add-device" type="button">Add device</button>
       <span class="legend">Change a mode, wait one heartbeat interval, then compare the Admin Dashboard.</span>
     </div>
+    <p class="legend" id="persistence-note"></p>
     <section class="devices" id="devices" aria-live="polite">
       <div class="device-card empty">Waiting for simulator status…</div>
     </section>
+    <section class="panel management-panel" aria-labelledby="jobs-title">
+      <h2 id="jobs-title">Simulated reconfiguration</h2>
+      <p class="legend">Change virtual telemetry only. No physical SDR configuration or firmware is applied. Targets must first send a heartbeat.</p>
+      <form id="job-form" class="form-grid">
+        <label>Target devices (Ctrl/Command to select multiple)<select name="targets" multiple required size="4" aria-label="Target devices"></select></label>
+        <label>Simulated outcome<select name="outcome"><option value="success">Success</option><option value="failure">Failure</option><option value="timeout">Timeout (no result)</option></select></label>
+        <label>Throughput (Mbps)<input name="throughputMbps" type="number" min="0" max="100000" step="any"></label>
+        <label>SNR (dB)<input name="snrDb" type="number" min="-200" max="200" step="any"></label>
+        <label>Job timeout (ms)<input name="timeoutMs" type="number" min="1000" max="300000" value="30000" required></label>
+        <button class="button primary" name="submitJob" type="submit">Queue simulated job</button>
+      </form>
+      <p class="legend" id="job-feedback" role="status"></p>
+      <div id="job-history" aria-live="polite">Loading jobs…</div>
+    </section>
+    <dialog id="device-editor" aria-labelledby="editor-title">
+      <h2 id="editor-title">Add virtual device</h2>
+      <p class="legend">Blank telemetry fields use automatic values. Fault scenarios send no request; choose Normal to recover.</p>
+      <p id="device-error" class="error" role="alert"></p>
+      <form id="device-form">
+        <div class="form-grid">
+          <label>Device ID<input name="id" required maxlength="64" pattern="SIM-SDR-[A-Za-z0-9._:\-]{1,56}" placeholder="SIM-SDR-005"></label>
+          <label>Display name<input name="displayName" required maxlength="100"></label>
+          <label>Model<input name="model" maxlength="100"></label>
+          <label>Location<input name="location" maxlength="100"></label>
+          <label>Throughput override (Mbps)<input name="throughputMbps" type="number" min="0" max="100000" step="any"></label>
+          <label>SNR override (dB)<input name="snrDb" type="number" min="-200" max="200" step="any"></label>
+          <label>Transport scenario<select name="fault"><option value="normal">Normal</option><option value="network_loss">Network loss</option><option value="timeout">Request timeout</option></select></label>
+        </div>
+        <div class="actions"><button class="button primary" name="save" type="submit">Save device</button><button class="button" id="cancel-device" type="button">Cancel</button></div>
+      </form>
+    </dialog>
   </main>
 
-  <script>
+  <script type="module">
+    import { createDevices } from "./console-devices.js";
+    import { createJobs } from "./console-jobs.js";
     const elements = {
       processState: document.querySelector('#process-state'),
       tick: document.querySelector('#tick-value'),
@@ -151,6 +201,20 @@
     const deviceCards = new Map();
     const pendingModes = new Set();
 
+    function showError(message) {
+      elements.error.textContent = message;
+      elements.error.classList.add('visible');
+    }
+    async function apiRequest(path, method, body) {
+      const response = await fetch(path, { method, headers: { 'Content-Type': 'application/json' },
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? `HTTP ${response.status}`);
+      return result;
+    }
+    const deviceManagement = createDevices({ request: apiRequest, refresh, error: showError });
+    const jobManagement = createJobs({ request: apiRequest, refresh, error: showError });
+
     function escapeHtml(value) {
       return String(value ?? '')
         .replaceAll('&', '&amp;')
@@ -168,8 +232,14 @@
     }
 
     function connectionLabel(device) {
-      if (device.mode === 'disconnected' || device.missedHeartbeats >= 3) return 'offline';
-      if (device.transportStatus === 'failed') return 'failed';
+      if (device.backendState?.available) return device.backendState.snapshot.connectionStatus === 'offline' ? 'Offline' : device.backendState.snapshot.healthStatus;
+      return 'Unknown';
+    }
+
+    function transportLabel(device) {
+      if (device.mode === 'disconnected' || device.transportStatus === 'skipped') return 'not sending';
+      if (device.transportStatus === 'failed') return 'transport error';
+      if (device.transportStatus === 'cancelled') return 'cancelled';
       return device.intendedHealthStatus ?? 'waiting';
     }
 
@@ -201,8 +271,11 @@
               <span data-field="dot" class="dot ${escapeHtml(device.transportStatus)}" aria-hidden="true"></span>
               <h3>${escapeHtml(device.id)}</h3>
             </div>
-            <span data-field="status" class="status ${escapeHtml(status)}">${escapeHtml(status)}</span>
+            <span data-field="status" class="status ${escapeHtml(device.backendState?.available ? device.backendState.snapshot.healthStatus : 'unknown')}">${escapeHtml(status)}</span>
           </div>
+          <p class="transport" data-field="backend-copy"></p>
+          <p class="legend" data-field="identity"></p>
+          <div class="actions"><button class="button" type="button" data-device-action="edit" data-id="${escapeHtml(device.id)}">Edit device</button><button class="button" type="button" data-device-action="remove" data-id="${escapeHtml(device.id)}">Remove</button></div>
           <div class="mode-row">
             <label for="mode-${escapeHtml(device.id)}">Simulation mode</label>
             <select id="mode-${escapeHtml(device.id)}" data-device-id="${escapeHtml(device.id)}">${options}</select>
@@ -236,8 +309,13 @@
       const field = (name) => card.querySelector(`[data-field="${name}"]`);
       const status = connectionLabel(device);
       field('dot').className = `dot ${device.transportStatus}`;
-      field('status').className = `status ${status}`;
+      field('status').className = `status ${device.backendState?.available ? device.backendState.snapshot.healthStatus : 'unknown'}`;
       field('status').textContent = status;
+      field('identity').textContent = `${device.displayName} • ${device.metadata?.model ?? 'No model'} • ${device.metadata?.location ?? 'No location'} • transport scenario: ${device.fault ?? 'normal'}`;
+      const backend = device.backendState;
+      field('backend-copy').textContent = backend?.available
+        ? `Backend confirmed • updated ${formatTime(backend.snapshot.updatedAt)} • checked ${formatTime(backend.snapshot.checkedAt)}`
+        : `Backend status unknown${backend?.snapshot ? ` • last confirmed ${formatTime(backend.snapshot.checkedAt)} (stale)` : ''}${backend?.lastError ? ` • ${backend.lastError}` : ''}`;
       field('throughput').textContent = telemetryValue(device, 'throughputMbps', 'Mbps');
       field('snr').textContent = telemetryValue(device, 'snrDb', 'dB');
       field('accepted').textContent = formatTime(device.lastAcceptedAt);
@@ -246,7 +324,7 @@
         ? `Backend accepted HTTP ${device.lastHttpStatus}`
         : device.transportStatus === 'skipped'
           ? `No heartbeat sent. Missed ${device.missedHeartbeats}`
-          : device.lastError ?? device.transportStatus;
+          : device.lastError ?? transportLabel(device);
       const select = card.querySelector('select');
       if (document.activeElement !== select && !pendingModes.has(device.id)) {
         select.value = device.mode;
@@ -272,9 +350,10 @@
       elements.tick.textContent = status.tick;
       elements.accepted.textContent = status.totals.accepted;
       elements.problem.textContent = `${status.totals.skipped} / ${status.totals.failed}`;
-      elements.controlUrl.textContent = `${status.controlUrl} • interval ${status.intervalMs / 1000}s`;
-      elements.serverUrl.textContent = status.serverUrl;
-      elements.adminLink.href = `${status.serverUrl}/#overview`;
+      elements.controlUrl.textContent = `${window.location.origin} • interval ${status.intervalMs / 1000}s • request timeout ${status.requestTimeoutMs / 1000}s`;
+      document.querySelector('#schedule-status').textContent = `${!status.running ? 'Paused' : status.sending ? 'Sending heartbeat batch' : `Next batch: ${formatTime(status.nextTickAt)} (in ${Math.max(0, Math.ceil((Date.parse(status.nextTickAt) - Date.now()) / 1000))}s)`}. For three missed heartbeats, configure the backend Offline timeout to ${status.recommendedHeartbeatTimeoutMs / 1000}s. Backend status is read independently; transport failure never confirms Offline.`;
+      elements.serverUrl.textContent = status.dashboardUrl ?? status.serverUrl;
+      elements.adminLink.href = `${status.dashboardUrl ?? status.serverUrl}/#overview`;
       elements.runControl.textContent = status.running ? 'Pause simulator' : 'Resume simulator';
       const currentIds = new Set(status.devices.map((device) => device.id));
       for (const [id, card] of deviceCards) {
@@ -284,6 +363,11 @@
         }
       }
       status.devices.forEach(updateDeviceCard);
+      if (!status.devices.length && !elements.devices.querySelector('.empty')) {
+        const empty = document.createElement('div'); empty.className = 'device-card empty'; empty.textContent = 'No virtual devices. Add a device to start sending heartbeats.'; elements.devices.append(empty);
+      }
+      deviceManagement.render(status);
+      jobManagement.render(status);
       elements.error.classList.remove('visible');
     }
 
@@ -291,20 +375,25 @@
       if (requestInProgress) return;
       requestInProgress = true;
       try {
-        const response = await fetch('/api/status', { headers: { Accept: 'application/json' } });
+        const response = await fetch('./api/status', { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(5000) });
         if (!response.ok) throw new Error(`Status API returned HTTP ${response.status}`);
         render(await response.json());
       } catch (error) {
         elements.error.textContent = `Cannot read simulator process: ${error.message}`;
         elements.error.classList.add('visible');
         elements.processState.textContent = 'Unavailable';
+        for (const card of deviceCards.values()) {
+          card.querySelector('[data-field=status]').textContent = 'Unknown';
+          card.querySelector('[data-field=status]').className = 'status unknown';
+          card.querySelector('[data-field=backend-copy]').textContent = 'Simulator unavailable; previous backend confirmation is stale.';
+        }
       } finally {
         requestInProgress = false;
       }
     }
 
     async function sendControl(action) {
-      const response = await fetch('/api/control', {
+      const response = await fetch('./api/control', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
@@ -316,7 +405,7 @@
     async function updateMode(deviceId, mode) {
       pendingModes.add(deviceId);
       try {
-        const response = await fetch(`/api/devices/${encodeURIComponent(deviceId)}/mode`, {
+        const response = await fetch(`./api/devices/${encodeURIComponent(deviceId)}/mode`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ mode }),
