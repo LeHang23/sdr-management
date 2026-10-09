@@ -14,6 +14,7 @@ frontend/
     |-- fleet-summary.js        Fleet Summary rendering and section interactions
     |-- fleet-health.js         Fleet Health rendering and section interactions
     |-- devices-to-watch.js     Devices to Watch rendering and snapshot validation
+    |-- recent-alerts.js        Recent Alerts rendering and snapshot validation
     `-- system-performance.js   System Performance chart and range controls
 ```
 
@@ -162,6 +163,15 @@ framework migration.
 Use `details.devicesToWatch` from the shared Overview Summary snapshot. The
 section renders identity, health, active issue summary, and last seen using text
 nodes. Keep loading/empty/error/stale/retry states within its module and retry
-through the page coordinator. Cache version v2 includes the watch-list contract;
+through the page coordinator. Cache version v3 includes the watch-list and recent-alerts contracts;
 old snapshots without it must not produce a fabricated empty fleet. Keep Device
 Detail and filtered View all unavailable until their destination screens exist.
+
+## Recent Alerts
+
+Use `details.recentAlerts` from the shared Overview Summary, never a separate
+section fetch. Render the latest three active/resolved incidents with text nodes,
+severity text, device/source labels and semantic occurrence timestamps. Use the
+full unresolved count, not a count of preview rows. The page coordinator owns
+refresh/cache/retry; the section owns loading/empty/error/stale rendering.
+Keep Alert Detail and `All` unavailable until their destination screens exist.

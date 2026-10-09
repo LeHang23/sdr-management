@@ -77,7 +77,7 @@ SDR Management
 | FBS-1.1.2 | Overview | System performance | Xu hướng Throughput và SNR, chọn khoảng thời gian, chú thích biểu đồ | Đã thiết kế |
 | FBS-1.1.3 | Overview | Fleet health | Phân bố sức khỏe Healthy, Warning, Offline và Updating | Đã thiết kế |
 | FBS-1.1.4 | Overview | Devices to watch | Danh sách ưu tiên, trạng thái, vấn đề, last seen, mở chi tiết và `View all` đến danh sách Device Management đã lọc | Đã triển khai một phần |
-| FBS-1.1.5 | Overview | Recent alerts | Severity, nội dung, nguồn, thời gian, mở chi tiết cảnh báo và `All` để truy cập Alert inbox đầy đủ | Đã thiết kế |
+| FBS-1.1.5 | Overview | Recent alerts | Incident mới nhất từ DB, health lifecycle, severity, nguồn, thời gian và freshness chung; chờ điều hướng Alert Detail và inbox qua `All` | Triển khai một phần |
 | FBS-1.1.6 | Overview | Reconfiguration action | Nút bắt đầu New reconfiguration | Đã thiết kế |
 | FBS-1.2 | Devices | Device list | Tìm kiếm, lọc, sắp xếp, phân trang, trạng thái, chọn nhiều | Dự kiến |
 | FBS-1.2.1 | Device form | Quản trị thiết bị | Đăng ký, sửa, bật, tắt và gắn nhãn thiết bị | Dự kiến |

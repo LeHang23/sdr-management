@@ -56,7 +56,7 @@ công việc đang chạy và sự cố gần đây. Trang cũng cung cấp các
 - Chu kỳ heartbeat mặc định của simulator phải là 60 giây. Timeout thiết bị
   stale mặc định phải là 180 giây để thiết bị chỉ chuyển Offline sau khi bỏ lỡ
   ba heartbeat dự kiến.
-- Fleet Summary, Fleet Health và Devices to Watch phải dùng chung snapshot và freshness state. Preview phải có tối đa năm thiết bị và hiển thị tổng số needs-attention.
+- Fleet Summary, Fleet Health, Devices to Watch và Recent Alerts phải dùng chung snapshot và freshness state. Preview thiết bị có tối đa năm thiết bị và tổng needs-attention. Preview cảnh báo có tối đa ba incident mới nhất, giữ lịch sử resolved và hiển thị tổng unresolved.
 - Đổi khoảng thời gian biểu đồ không được tải lại toàn bộ trang.
 - Chọn thiết bị, cảnh báo, `View all`, `All` hoặc primary action phải mở đúng màn hình
   hoặc workflow tương ứng khi khả dụng.

@@ -1,3 +1,5 @@
+import { syncGatewayHealthAlert } from './recent-alerts.js';
+
 const DEVICE_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$/;
 const HEALTH_STATUSES = new Set(['online', 'warning', 'offline', 'updating']);
 
@@ -101,6 +103,7 @@ export function ingestGatewayHeartbeat(database, deviceId, payload, receivedAt =
       );
     }
 
+    syncGatewayHealthAlert(database, deviceId, heartbeat.healthStatus, normalizedReceivedAt);
     database.exec('COMMIT;');
   } catch (error) {
     database.exec('ROLLBACK;');
@@ -118,14 +121,26 @@ export function ingestGatewayHeartbeat(database, deviceId, payload, receivedAt =
 
 export function expireStaleGatewayDevices(database, staleBefore) {
   const normalizedStaleBefore = normalizeTimestamp(staleBefore, staleBefore);
-  const result = database.prepare(`
+  const occurredAt = new Date().toISOString();
+  database.exec('BEGIN IMMEDIATE;');
+  try {
+    const devices = database.prepare(`SELECT id FROM devices
+      WHERE source = 'sdr_gateway' AND connection_status = 'online'
+        AND (last_seen_at IS NULL OR last_seen_at < ?)`).all(normalizedStaleBefore);
+    database.prepare(`
     UPDATE devices
     SET connection_status = 'offline',
         health_status = 'offline',
-        updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+        updated_at = ?
     WHERE source = 'sdr_gateway'
       AND connection_status = 'online'
       AND (last_seen_at IS NULL OR last_seen_at < ?)
-  `).run(normalizedStaleBefore);
-  return Number(result.changes);
+    `).run(occurredAt, normalizedStaleBefore);
+    for (const device of devices) syncGatewayHealthAlert(database, device.id, 'offline', occurredAt);
+    database.exec('COMMIT;');
+    return devices.length;
+  } catch (error) {
+    database.exec('ROLLBACK;');
+    throw error;
+  }
 }

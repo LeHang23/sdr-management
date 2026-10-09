@@ -8,7 +8,7 @@
       content="SDR Management administrator dashboard prototype"
     />
     <title>SDR Management — Operations overview</title>
-    <link rel="stylesheet" href="styles.css?v=20261001-devices-watch" />
+    <link rel="stylesheet" href="styles.css?v=20261005-recent-alerts" />
   </head>
   <body>
     <div class="app-shell">
@@ -299,11 +299,11 @@
             </div>
           </article>
 
-          <article class="card alerts-card" id="alerts">
+          <article class="card alerts-card is-loading" id="alerts" aria-busy="true">
             <div class="card-header list-header">
               <div>
                 <h2>Recent alerts</h2>
-                <p>2 unresolved alerts</p>
+                <p id="recent-alerts-count">Latest fleet incidents</p>
               </div>
               <span
                 class="planned-link"
@@ -316,29 +316,13 @@
               </span>
             </div>
 
-            <ul class="alert-list">
-              <li>
-                <span class="alert-symbol critical" aria-hidden="true">!</span>
-                <div>
-                  <strong>Temperature threshold exceeded</strong>
-                  <p>SDR-HCM-04 · 72°C · 2 min</p>
-                </div>
-              </li>
-              <li>
-                <span class="alert-symbol warning" aria-hidden="true">⌁</span>
-                <div>
-                  <strong>SDR-DN-02 heartbeat lost</strong>
-                  <p>No heartbeat · 8 min</p>
-                </div>
-              </li>
-              <li>
-                <span class="alert-symbol warning" aria-hidden="true">!</span>
-                <div>
-                  <strong>Job RC-108 verifying</strong>
-                  <p>Canary deployment · 14 min</p>
-                </div>
-              </li>
+            <ul class="alert-list" id="recent-alerts-list" aria-label="Recent fleet alerts">
+              <li class="recent-alerts-message">Loading recent alerts…</li>
             </ul>
+            <div class="recent-alerts-footer">
+              <p id="recent-alerts-status" role="status">Loading latest snapshot…</p>
+              <button class="summary-retry" id="recent-alerts-retry" type="button" hidden>Retry</button>
+            </div>
           </article>
         </section>
 
@@ -349,6 +333,6 @@
         </main>
       </div>
     </div>
-    <script type="module" src="scripts/overview.js?v=20261001-devices-watch"></script>
+    <script type="module" src="scripts/overview.js?v=20261005-recent-alerts"></script>
   </body>
 </html>

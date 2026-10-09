@@ -2,10 +2,11 @@ import { initSystemPerformance } from './system-performance.js';
 import { renderFleetSummary, renderFleetSummaryUnavailable } from './fleet-summary.js';
 import { renderFleetHealth, renderFleetHealthUnavailable } from './fleet-health.js';
 import { isValidDevicesToWatch, renderDevicesToWatch, renderDevicesToWatchUnavailable } from './devices-to-watch.js';
+import { isValidRecentAlerts, renderRecentAlerts, renderRecentAlertsUnavailable } from './recent-alerts.js';
 
 const endpoint = '/api/v1/overview/summary';
 const refreshIntervalMs = 5_000;
-const cacheKey = 'sdr-management.overview-summary.v2';
+const cacheKey = 'sdr-management.overview-summary.v3';
 const healthStates = ['online', 'warning', 'offline', 'updating'];
 const retryButton = document.querySelector('#fleet-summary-retry');
 let refreshInProgress = false;
@@ -41,6 +42,7 @@ function isValidSummary(summary) {
     metricsValid &&
       healthCountsValid &&
       isValidDevicesToWatch(summary.details.devicesToWatch, summary.metrics.needsAttention) &&
+      isValidRecentAlerts(summary.details.recentAlerts) &&
       healthStates.reduce((total, state) => total + counts[state], 0) === summary.metrics.totalDevices &&
       typeof summary.generatedAt === 'string' &&
       Number.isFinite(Date.parse(summary.generatedAt)) &&
@@ -53,6 +55,7 @@ function renderSnapshot(summary, options) {
   renderFleetSummary(summary, options);
   renderFleetHealth(summary, options);
   renderDevicesToWatch(summary, options);
+  renderRecentAlerts(summary, options);
 }
 
 async function refreshSummary() {
@@ -75,6 +78,7 @@ async function refreshSummary() {
       renderFleetSummaryUnavailable('Fleet summary is unavailable. Check the local Node.js server and retry.');
       renderFleetHealthUnavailable();
       renderDevicesToWatchUnavailable();
+      renderRecentAlertsUnavailable();
     }
     console.error('Could not refresh fleet summary', error);
   } finally {
@@ -84,6 +88,7 @@ async function refreshSummary() {
 
 retryButton.addEventListener('click', refreshSummary);
 document.querySelector('#devices-watch-retry').addEventListener('click', refreshSummary);
+document.querySelector('#recent-alerts-retry').addEventListener('click', refreshSummary);
 initSystemPerformance();
 refreshSummary();
 window.setInterval(refreshSummary, refreshIntervalMs);
