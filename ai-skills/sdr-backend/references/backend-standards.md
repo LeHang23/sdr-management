@@ -132,3 +132,15 @@ transaction, rolling back device state if incident persistence fails. Revision
 triggers include incident insert/update/delete so ETags and all Overview sections
 stay coherent. Test legacy migration, repeated seed, deduplication, recurrence,
 recovery, counts, chronological preview, source labels and rollback.
+
+## Device List
+
+`GET /api/v1/devices` is read-only and uses `getDeviceList` with one snapshot
+for count and rows. Validate each query parameter once; bind search/filter values
+and allowlist sort expressions. Literal ID/name search ignores ASCII case.
+Keep health and connection distinct. Needs attention is Warning/Offline health
+or an active critical issue, counting each device once, matching Overview.
+Return per-record manual/simulator/sdr_gateway labels, nullable last seen,
+fleetTotal, filtered total, page/pageSize/pageCount and snapshot metadata.
+Keep ID tie-breaking and null-last timestamp ordering deterministic. Page sizes
+are 10/25/50/100; clamp obsolete pages after deletion. No write APIs in list work.

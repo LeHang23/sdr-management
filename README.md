@@ -143,7 +143,7 @@ The Devices to Watch preview shows up to five devices from the same Summary
 snapshot as the KPI cards. Active critical issues rank first, Offline next,
 then Warning, with the latest issue/device update breaking ties. It shows the
 full needs-attention count, ignores resolved issues, and displays `Never seen`
-for missing last-seen timestamps. Device Detail and filtered `View all` remain
+for missing last-seen timestamps. Filtered `View all` opens the implemented Device List. Device Detail remains
 planned.
 
 Recent Alerts reads the latest three `device_issues` from the same Summary
@@ -201,3 +201,24 @@ physical SDR hardware. See
 [`backend/simulator/README.md`](backend/simulator/README.md) for configuration,
 interval/Offline policy and control semantics. Requirements are mirrored under
 `docs/requirements/SIMULATOR-CONSOLE/` and `docs/requirements_vi/SIMULATOR-CONSOLE/`.
+
+## Device List
+
+Open [http://localhost:4173/devices.html](http://localhost:4173/devices.html).
+The read-only `GET /api/v1/devices` endpoint supports literal ID/name search
+(`q`, up to 100 characters, ASCII case-insensitive), `health`, `connection`,
+`source` (manual/simulator/sdr_gateway), `attention=true`, `sort`
+(name/id/health/connection/lastSeen), `direction` (asc/desc), `page` and
+`pageSize` (10/25/50/100, default 25). Filters default to `all`; name ascending
+is the default sort. Count and rows share one read snapshot. Invalid or repeated
+query parameters return 400. Last-seen nulls sort last; out-of-range pages clamp
+to the last page. Health priority ascending is Offline, Warning, Updating, Healthy.
+
+Filters and pagination persist in the URL. Overview Devices navigation opens
+the list; Devices to Watch `View all` applies `attention=true`. Selection applies
+to the current page; changing query/page clears it. Refresh preserves only
+selected IDs still visible. Bulk actions, Device Detail and Add new device remain
+planned. The visible page refreshes every 30 seconds and on return/reconnection;
+refresh failures retain a labeled stale snapshot only for the same query.
+Requirements are mirrored under `DEVICE-LIST/`. No dedicated Device List Figma
+frame is available; the existing Administrator shell and tokens are reused.
