@@ -24,6 +24,7 @@
   font-synthesis: none;
 }
 
+
 * {
   box-sizing: border-box;
 }
@@ -1343,3 +1344,32 @@ td small {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Device inventory reuses the Administrator shell and status tokens. */
+.device-list-link { color: var(--blue-600); text-decoration: none; font-weight: 600; }
+.device-list-card { margin-top: 24px; overflow: hidden; }
+.device-list-card > .card-header { padding: 20px 24px; }
+.device-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; padding: 0 24px 20px; border-bottom: 1px solid var(--slate-200); }
+.device-filters label { display: grid; gap: 8px; color: var(--slate-700); font-weight: 600; }
+.device-search { flex: 1 1 240px; }
+.device-filters input, .device-filters select, .device-pagination select { font: inherit; color: var(--slate-950); border: 1px solid var(--slate-300); border-radius: 6px; padding: 10px; background: var(--white); min-height: 38px; }
+.device-filter-actions { display: flex; align-items: center; gap: 12px; }
+.device-list-status, .device-selection { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 24px; }
+.device-list-status p { margin: 0; }
+.device-list-status.is-stale { color: var(--amber-500); background: #fff9e8; }
+.device-selection { color: var(--slate-700); background: var(--slate-100); border-block: 1px solid var(--slate-200); }
+.device-selection > span:last-child { margin-left: auto; color: var(--slate-700); }
+.device-inventory-table { min-width: 760px; }
+.device-inventory-table td { vertical-align: middle; }
+.device-inventory-table td:nth-child(2) { max-width: 280px; white-space: normal; overflow-wrap: anywhere; }
+.device-inventory-table td strong, .device-inventory-table td small { display: block; }
+.device-inventory-table td small { margin-top: 5px; color: var(--slate-700); }
+.device-inventory-table input { accent-color: var(--blue-600); width: 16px; height: 16px; }
+.device-inventory-table .device-message { padding: 40px 24px; text-align: center; color: var(--slate-700); }
+.device-pagination { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 24px; border-top: 1px solid var(--slate-200); }
+.device-pagination > div { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.device-pagination p { margin: 0; color: var(--slate-700); }
+.device-list-card button:disabled, .page-header button:disabled, .global-header button:disabled { opacity: 0.55; cursor: not-allowed; }
+.device-list-card :is(button, input, select):focus-visible, .device-list-link:focus-visible { outline: 2px solid var(--blue-600); outline-offset: 3px; }
+
+.device-inventory-table :is(th, td):first-child { width: 44px; min-width: 44px; padding-left: 16px; }

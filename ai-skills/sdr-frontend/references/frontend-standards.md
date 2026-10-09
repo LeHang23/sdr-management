@@ -164,8 +164,8 @@ Use `details.devicesToWatch` from the shared Overview Summary snapshot. The
 section renders identity, health, active issue summary, and last seen using text
 nodes. Keep loading/empty/error/stale/retry states within its module and retry
 through the page coordinator. Cache version v3 includes the watch-list and recent-alerts contracts;
-old snapshots without it must not produce a fabricated empty fleet. Keep Device
-Detail and filtered View all unavailable until their destination screens exist.
+old snapshots without it must not produce a fabricated empty fleet. Keep Device Detail unavailable until its destination exists. Filtered View all
+opens `devices.html?attention=true`.
 
 ## Recent Alerts
 
@@ -175,3 +175,13 @@ severity text, device/source labels and semantic occurrence timestamps. Use the
 full unresolved count, not a count of preview rows. The page coordinator owns
 refresh/cache/retry; the section owns loading/empty/error/stale rendering.
 Keep Alert Detail and `All` unavailable until their destination screens exist.
+
+## Device List
+
+`devices.html` reuses the Administrator shell. `device-list.js` owns API refresh,
+URL state, cancellation/timeouts and freshness. `device-list-controls.js` owns
+search/filter interactions; `device-list-table.js` owns validation, safe text
+rendering and page selection. Keep health separate from connectivity and label
+each record's source. Old query results must not survive filter/page changes;
+refresh failures may retain a clearly labeled stale snapshot of the same query.
+Keep planned Device Detail, bulk operations and registration visibly unavailable.

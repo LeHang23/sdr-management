@@ -5,6 +5,7 @@ import { existsSync } from 'node:fs';
 import { dirname, extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { openDatabase, migrateDatabase, seedDatabase } from './database.js';
+import { getDeviceList } from './device-list.js';
 import { getOverviewSummary } from './overview-summary.js';
 import { getSystemPerformance, PERFORMANCE_RANGES } from './system-performance.js';
 import { previewAuth } from './preview-auth.js';
@@ -160,6 +161,22 @@ const server = createServer(async (request, response) => {
       }
       console.error('Could not ingest gateway heartbeat', error);
       sendJson(response, 500, { error: 'Gateway heartbeat unavailable' });
+    }
+    return;
+  }
+  if (url.pathname === '/api/v1/devices') {
+    if (request.method !== 'GET') {
+      sendJson(response, 405, { error: 'Method not allowed' }, { Allow: 'GET' });
+      return;
+    }
+    try {
+      sendJson(response, 200, getDeviceList(database, url.searchParams));
+    } catch (error) {
+      if (error.statusCode === 400) sendJson(response, 400, { error: error.message });
+      else {
+        console.error('Could not read device list', error);
+        sendJson(response, 500, { error: 'Device list unavailable' });
+      }
     }
     return;
   }

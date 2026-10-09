@@ -22,5 +22,5 @@ current location.
 
 ## Acceptance criteria
 
-- Overview is active on the Admin Dashboard.
+- Overview or Devices is marked current on its corresponding page.
 - Keyboard and pointer users can reach every enabled destination.
