@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="SDR Management administrator dashboard prototype"
+    />
+    <title>SDR Management — Devices</title>
+    <link rel="stylesheet" href="styles.css?v=20261009-device-list" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <img class="brand-mark-bg" src="assets/icons/brand-bg.svg" alt="" />
+            <img class="brand-mark-device" src="assets/icons/brand-device.svg" alt="" />
+          </span>
+          <span class="brand-copy">
+            <strong>SDR Management</strong>
+            <small>Operations platform</small>
+          </span>
+        </div>
+
+        <nav class="navigation">
+          <p class="nav-label">Operations</p>
+          <a class="nav-item" href="index.html">
+            <span class="nav-icon" aria-hidden="true"><img src="assets/icons/overview.svg" alt="" /></span>
+            <span>Overview</span>
+          </a>
+          <a class="nav-item is-active" href="devices.html" aria-current="page">
+            <span class="nav-icon" aria-hidden="true"><img src="assets/icons/devices.svg" alt="" /></span>
+            <span>Devices</span>
+          </a>
+          <a class="nav-item" href="index.html#new-reconfiguration">
+            <span class="nav-icon nav-icon-composite" aria-hidden="true">
+              <img src="assets/icons/reconfiguration.svg" alt="" />
+              <img class="reconfiguration-detail" src="assets/icons/reconfiguration-detail.svg" alt="" />
+            </span>
+            <span>Reconfiguration</span>
+          </a>
+          <a class="nav-item" href="index.html#monitoring">
+            <span class="nav-icon" aria-hidden="true"><img src="assets/icons/monitoring.svg" alt="" /></span>
+            <span>Monitoring</span>
+          </a>
+
+          <p class="nav-label nav-label-secondary">Administration</p>
+          <span class="nav-item is-disabled" aria-disabled="true">
+            <span class="nav-icon" aria-hidden="true"><img src="assets/icons/firmware.svg" alt="" /></span>
+            <span>Firmware</span>
+          </span>
+          <span class="nav-item is-disabled" aria-disabled="true">
+            <span class="nav-icon" aria-hidden="true"><img src="assets/icons/config-profiles.svg" alt="" /></span>
+            <span>Config profiles</span>
+          </span>
+          <a class="nav-item" href="index.html#alerts">
+            <span class="nav-icon nav-icon-composite nav-icon-alerts" aria-hidden="true">
+              <img src="assets/icons/alerts.svg" alt="" />
+              <img class="alerts-detail" src="assets/icons/alerts-detail.svg" alt="" />
+            </span>
+            <span>Alerts</span>
+            
+          </a>
+          <span class="nav-item is-disabled" aria-disabled="true">
+            <span class="nav-icon" aria-hidden="true"><img src="assets/icons/audit-log.svg" alt="" /></span>
+            <span>Audit log</span>
+          </span>
+        </nav>
+
+        <section class="simulator-card" aria-label="Current fleet data source">
+          <div class="simulator-title">
+            <strong id="fleet-source-title">Fleet data source</strong>
+          </div>
+          <p id="fleet-source-copy">Manual and simulated records are labeled in the device list.</p>
+        </section>
+      </aside>
+
+      <div class="content-shell">
+        <header class="global-header" aria-label="Administrator toolbar">
+          <p class="breadcrumb">
+            <span>SDR Management</span>
+            <span aria-hidden="true">/</span>
+            <strong>Devices</strong>
+          </p>
+
+          <div class="global-header-actions">
+            <button class="icon-button" type="button" disabled title="Global search is planned" aria-label="Search SDR Management (planned)">
+              <span class="search-glyph" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <circle cx="10.5" cy="10.5" r="5.5"></circle>
+                  <path d="m15 15 4 4"></path>
+                </svg>
+              </span>
+            </button>
+            <button class="profile-button" type="button" disabled title="Profile menu is planned" aria-label="Administrator profile menu (planned)">
+              <span class="avatar" aria-hidden="true">AD</span>
+            </button>
+          </div>
+        </header>
+
+        <main class="workspace" id="device-list">
+          <header class="page-header">
+            <div><h1>Devices</h1><p class="page-subtitle">Search your fleet and review device health and connectivity.</p></div>
+            <button class="primary-button" type="button" disabled title="Device registration is planned">Add new device</button>
+          </header>
+          <section class="card device-list-card" aria-labelledby="device-list-heading">
+            <div class="card-header"><div><h2 id="device-list-heading">Device inventory</h2><p id="device-count">Loading devices…</p></div>
+              <button class="summary-retry" id="device-refresh" type="button">Refresh</button>
+            </div>
+            <form id="device-filters" class="device-filters" role="search" aria-label="Search and filter devices">
+              <label class="device-search">Search devices<input name="q" type="search" maxlength="100" placeholder="Device ID or name" autocomplete="off" /></label>
+              <label>Health<select name="health"><option value="all">All health states</option><option value="online">Healthy</option><option value="warning">Warning</option><option value="offline">Offline</option><option value="updating">Updating</option></select></label>
+              <label>Connection<select name="connection"><option value="all">All connections</option><option value="online">Online</option><option value="offline">Offline</option></select></label>
+              <label>Source<select name="source"><option value="all">All sources</option><option value="manual">Manual input</option><option value="simulator">Simulator</option><option value="sdr_gateway">SDR Gateway</option></select></label>
+              <label>Attention<select name="attention"><option value="all">All devices</option><option value="true">Needs attention</option></select></label>
+              <label>Sort by<select name="sort"><option value="name">Name</option><option value="id">Device ID</option><option value="health">Health priority</option><option value="connection">Connection</option><option value="lastSeen">Last seen</option></select></label>
+              <label>Order<select name="direction"><option value="asc">Ascending</option><option value="desc">Descending</option></select></label>
+              <div class="device-filter-actions"><button class="primary-button" type="submit">Search</button><button class="summary-retry" type="button" id="device-clear">Clear filters</button></div>
+            </form>
+            <div class="device-list-status"><p id="device-status" role="status">Loading latest snapshot…</p><button class="summary-retry" id="device-retry" type="button" hidden>Retry</button></div>
+            <div class="device-selection"><span id="device-selection-count" role="status">0 devices selected on this page</span><button class="summary-retry" id="device-selection-clear" type="button" disabled>Clear selection</button><span>Device Detail and bulk actions are planned.</span></div>
+            <div class="table-scroll" id="device-table-region" aria-busy="true">
+              <table class="device-inventory-table" aria-label="Device inventory">
+                <thead><tr><th scope="col"><input id="device-select-all" type="checkbox" aria-label="Select all devices on this page" disabled /></th><th scope="col">Device</th><th scope="col">Health</th><th scope="col">Connection</th><th scope="col">Source</th><th scope="col">Last seen</th><th scope="col">Attention</th></tr></thead>
+                <tbody id="device-rows"><tr><td colspan="7">Loading devices…</td></tr></tbody>
+              </table>
+            </div>
+            <div class="device-pagination"><p id="device-page-summary">Waiting for devices…</p><div><label>Rows per page <select id="device-page-size"><option value="10">10</option><option value="25" selected>25</option><option value="50">50</option><option value="100">100</option></select></label><button class="summary-retry" id="device-previous" type="button" disabled>Previous</button><span id="device-page-number">Page 1</span><button class="summary-retry" id="device-next" type="button" disabled>Next</button></div></div>
+          </section>
+          <footer class="page-footer"><p>SDR Management · Device inventory</p><p>Automatically refreshes every 30 seconds</p></footer>
+        </main>
+      </div>
+    </div>
+    <script type="module" src="scripts/device-list.js?v=20261009-device-list"></script>
+  </body>
+</html>

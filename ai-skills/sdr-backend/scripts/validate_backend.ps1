@@ -10,6 +10,8 @@ try {
     'backend/src/gateway-ingestion.js',
     'backend/src/overview-summary.js',
     'backend/src/devices-to-watch.js',
+    'backend/src/device-list.js',
+    'backend/test/device-list.test.js',
     'backend/src/recent-alerts.js',
     'backend/src/system-performance.js',
     'backend/src/server.js',
@@ -54,6 +56,7 @@ try {
   node --check backend/simulator/simulator-runtime.js
   node --check backend/src/overview-summary.js
   node --check backend/src/devices-to-watch.js
+  node --check backend/src/device-list.js
   node --check backend/src/recent-alerts.js
   node --check backend/src/system-performance.js
   npm.cmd run test

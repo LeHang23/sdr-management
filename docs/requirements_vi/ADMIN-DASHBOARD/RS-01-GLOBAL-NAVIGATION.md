@@ -21,5 +21,5 @@ Cho phép Administrator di chuyển giữa các module và hiểu vị trí hi�
 
 ## Tiêu chí chấp nhận
 
-- Overview ở trạng thái active trên Admin Dashboard.
+- Overview hoặc Devices có trạng thái current trên trang tương ứng.
 - Người dùng bàn phím và con trỏ truy cập được mọi điểm đến khả dụng.

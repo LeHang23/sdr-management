@@ -79,7 +79,7 @@ SDR Management
 | FBS-1.1.4 | Overview | Devices to watch | Danh sách ưu tiên, trạng thái, vấn đề, last seen, mở chi tiết và `View all` đến danh sách Device Management đã lọc | Đã triển khai một phần |
 | FBS-1.1.5 | Overview | Recent alerts | Incident mới nhất từ DB, health lifecycle, severity, nguồn, thời gian và freshness chung; chờ điều hướng Alert Detail và inbox qua `All` | Triển khai một phần |
 | FBS-1.1.6 | Overview | Reconfiguration action | Nút bắt đầu New reconfiguration | Đã thiết kế |
-| FBS-1.2 | Devices | Device list | Tìm kiếm, lọc, sắp xếp, phân trang, trạng thái, chọn nhiều | Dự kiến |
+| FBS-1.2 | Devices | Device list | Tìm kiếm, bộ lọc kết hợp, sắp xếp, phân trang, health/connection/source/last seen, chọn trên trang; bulk actions dự kiến | Đã triển khai |
 | FBS-1.2.1 | Device form | Quản trị thiết bị | Đăng ký, sửa, bật, tắt và gắn nhãn thiết bị | Dự kiến |
 | FBS-1.2.2 | Device detail | Tổng quan | Identity, model, vị trí, sức khỏe, kết nối, phiên bản, last seen | Dự kiến |
 | FBS-1.2.3 | Device detail | Monitoring | Live metrics, biểu đồ lịch sử, khoảng thời gian, active alerts | Dự kiến |

@@ -76,10 +76,10 @@ SDR Management
 | FBS-1.1.1 | Overview | Fleet summary | Total devices, online devices, devices needing attention, active jobs | Designed |
 | FBS-1.1.2 | Overview | System performance | Throughput and SNR trends, time-range control, chart legend | Designed |
 | FBS-1.1.3 | Overview | Fleet health | Healthy, Warning, Offline, and Updating health distribution | Designed |
-| FBS-1.1.4 | Overview | Devices to watch | Prioritized device list, state, issue summary, last seen, detail action, and `View all` navigation to the filtered Device Management list | Partially implemented |
+| FBS-1.1.4 | Overview | Devices to watch | Prioritized device list, state, issue summary, last seen, detail action, and `View all` navigation to the implemented filtered Device List | Partially implemented |
 | FBS-1.1.5 | Overview | Recent alerts | DB-backed latest incidents, health lifecycle, severity, source, time and shared freshness; Alert Detail and `All` inbox navigation pending | Partially implemented |
 | FBS-1.1.6 | Overview | Reconfiguration action | New reconfiguration call to action | Designed |
-| FBS-1.2 | Devices | Device list | Search, filters, sorting, pagination, health and connection status, bulk selection | Planned |
+| FBS-1.2 | Devices | Device list | Search, combined filters, sorting, pagination, health/connection/source/last seen, page selection; bulk actions planned | Implemented |
 | FBS-1.2.1 | Device form | Device administration | Register, edit, enable, disable, and label a simulated or physical device | Planned |
 | FBS-1.2.2 | Device detail | Overview | Identity, model, location, health, connectivity, installed versions, last seen | Planned |
 | FBS-1.2.3 | Device detail | Monitoring | Live metrics, historical charts, metric time range, active alerts | Planned |

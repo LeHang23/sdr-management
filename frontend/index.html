@@ -8,7 +8,7 @@
       content="SDR Management administrator dashboard prototype"
     />
     <title>SDR Management — Operations overview</title>
-    <link rel="stylesheet" href="styles.css?v=20261005-recent-alerts" />
+    <link rel="stylesheet" href="styles.css?v=20261009-device-list" />
   </head>
   <body>
     <div class="app-shell">
@@ -30,7 +30,7 @@
             <span class="nav-icon" aria-hidden="true"><img src="assets/icons/overview.svg" alt="" /></span>
             <span>Overview</span>
           </a>
-          <a class="nav-item" href="#devices">
+          <a class="nav-item" href="devices.html">
             <span class="nav-icon" aria-hidden="true"><img src="assets/icons/devices.svg" alt="" /></span>
             <span>Devices</span>
           </a>
@@ -267,15 +267,7 @@
                 <h2>Devices to watch</h2>
                 <p id="devices-watch-count">Sorted by priority</p>
               </div>
-              <span
-                class="planned-link"
-                role="link"
-                aria-disabled="true"
-                aria-label="View all devices needing attention. Device Management is planned."
-                title="Will open Device Management with the Needs attention filter"
-              >
-                View all <span aria-hidden="true">→</span>
-              </span>
+              <a class="device-list-link" href="devices.html?attention=true">View all <span aria-hidden="true">→</span></a>
             </div>
 
             <div class="table-scroll">
